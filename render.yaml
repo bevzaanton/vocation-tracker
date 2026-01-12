@@ -1,0 +1,58 @@
+services:
+  # Backend API Service
+  - type: web
+    name: vacation-backend
+    runtime: python
+    region: oregon
+    plan: starter
+    rootDir: backend
+    buildCommand: "./build.sh"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vacation-postgres
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 43200
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FRONTEND_URL
+        value: https://vacation-frontend.onrender.com
+    autoDeploy: true
+
+  # Frontend Static Site
+  - type: web
+    name: vacation-frontend
+    runtime: static
+    region: oregon
+    plan: starter
+    buildCommand: "cd frontend && npm ci && npm run build"
+    staticPublishPath: ./frontend/dist
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://vacation-backend.onrender.com/api/*
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    envVars:
+      - key: VITE_API_URL
+        value: https://vacation-backend.onrender.com/api/v1
+    autoDeploy: true
+
+databases:
+  - name: vacation-postgres
+    databaseName: vacation_db
+    plan: starter
+    region: oregon
+    postgresMajorVersion: 15

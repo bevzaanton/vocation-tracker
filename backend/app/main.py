@@ -77,11 +77,24 @@ app = FastAPI(
 )
 
 # CORS Middleware
+import os
+
+# Allow localhost for development and Render.com domains for production
 origins = [
     "http://localhost:3000",
     "http://localhost:80",
     "http://localhost:5173", # Vite default dev port
 ]
+
+# Add production origins from environment variable if available
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    origins.append(frontend_url)
+    # Also add HTTPS version if HTTP is provided
+    if frontend_url.startswith("http://"):
+        origins.append(frontend_url.replace("http://", "https://"))
+    # Add onrender.com pattern
+    origins.append("https://*.onrender.com")
 
 app.add_middleware(
     CORSMiddleware,

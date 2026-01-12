@@ -74,7 +74,21 @@ npm run test:coverage
 ```
 
 ## Deployment
-configured for Render. Connect your repository to Render and use `docker-compose.yml` or individual Dockerfiles.
+
+This project is ready to deploy on [Render.com](https://render.com). See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete deployment instructions.
+
+### Quick Deploy to Render
+
+1. Push your code to GitHub
+2. Go to [Render Dashboard](https://dashboard.render.com)
+3. Click "New +" → "Blueprint"
+4. Connect your repository
+5. Render will automatically detect `render.yaml` and create:
+   - PostgreSQL database
+   - Backend API service
+   - Frontend static site
+
+For manual deployment, custom domains, environment variables, and troubleshooting, see the full [Deployment Guide](DEPLOYMENT.md).
 
 ## API Documentation
 
