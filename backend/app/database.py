@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
-import os
+from app.core.config import settings
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = settings.DATABASE_URL
 
 # Ensure async driver is used
 if DATABASE_URL and DATABASE_URL.startswith("postgresql://"):

@@ -15,6 +15,8 @@ reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
 )
 
+from sqlalchemy.orm import selectinload
+
 async def get_current_user(
     db: AsyncSession = Depends(get_db),
     token: str = Depends(reusable_oauth2)
@@ -37,7 +39,11 @@ async def get_current_user(
         )
 
     # In async sqlalchemy we need to execute the query
-    result = await db.execute(select(models.User).where(models.User.id == int(token_data.sub)))
+    result = await db.execute(
+        select(models.User)
+        .options(selectinload(models.User.approvers))
+        .where(models.User.id == int(token_data.sub))
+    )
     user = result.scalars().first()
     
     if not user:

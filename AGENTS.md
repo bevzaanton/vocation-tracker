@@ -60,6 +60,7 @@
 ## 4. Key Implementation Details & Gotchas
 *   **Trailing Slashes**: The backend strict slash behavior can cause redirects. Always append a trailing slash to API endpoint calls (e.g., `/api/v1/vacation-types/`) or ensure the client handles redirects correctly.
 *   **Nginx Proxy Headers**: The Nginx configuration in the frontend container **must** pass `Host $http_host` to the backend. Failure to do so results in the backend generating redirects to `localhost:80` (internal container port) instead of `localhost:3000` (external access port), breaking the app for the user.
+*   **Async SQLAlchemy & Relationships**: When using async SQLAlchemy, loading collection-based relationships (like `User.approvers`) with `lazy="joined"` can cause `InvalidRequestError` if `.unique()` isn't called on the result. It's recommended to use `lazy="selectin"` for collections to avoid this and improve performance in async contexts.
 *   **Environment Variables**:
     *   Backend relies on `DATABASE_URL` and `SECRET_KEY`.
     *   Frontend relies on `VITE_API_URL` (defaulting to `/api/v1`).

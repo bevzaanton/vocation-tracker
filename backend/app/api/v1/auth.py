@@ -22,18 +22,30 @@ async def login_access_token(
     OAuth2 compatible token login, get an access token for future requests
     """
     # 1. Fetch user by email
-    result = await db.execute(select(models.User).where(models.User.email == form_data.username))
+    email = form_data.username.strip()
+    print(f"Login attempt for: '{email}'")
+    result = await db.execute(select(models.User).where(models.User.email == email))
     user = result.scalars().first()
 
     # 2. Verify password
-    if not user or not security.verify_password(form_data.password, user.password_hash):
+    if not user:
+        print(f"User not found: {email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+    
+    if not security.verify_password(form_data.password, user.password_hash):
+        print(f"Password mismatch for: {email}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
     
     if not user.is_active:
+         print(f"User inactive: {email}")
          raise HTTPException(status_code=400, detail="Inactive user")
+
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return {

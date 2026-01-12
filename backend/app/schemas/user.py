@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-from datetime import datetime
+from typing import Optional, List
+from datetime import datetime, date
 
 # Shared properties
 class UserBase(BaseModel):
@@ -8,11 +8,13 @@ class UserBase(BaseModel):
     name: str = None
     is_active: bool = True
     role: str = "employee"
+    start_date: Optional[date] = None
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str
     manager_id: Optional[int] = None
+    approver_ids: Optional[List[int]] = []
 
 # Properties to receive via API on update
 class UserUpdate(BaseModel):
@@ -22,6 +24,8 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
     role: Optional[str] = None
     manager_id: Optional[int] = None
+    start_date: Optional[date] = None
+    approver_ids: Optional[List[int]] = None
 
 class UserInDBBase(UserBase):
     id: int
@@ -34,7 +38,7 @@ class UserInDBBase(UserBase):
 
 # Additional properties to return via API
 class User(UserInDBBase):
-    pass
+    approvers: List[UserInDBBase] = []
 
 class UserInDB(UserInDBBase):
     hashed_password: str

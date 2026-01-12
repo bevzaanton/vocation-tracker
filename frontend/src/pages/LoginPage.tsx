@@ -13,13 +13,17 @@ export default function LoginPage() {
     const navigate = useNavigate();
 
     const onSubmit = async (data: any) => {
+        console.log('onSubmit called with data:', data);
         setLoading(true);
         setError('');
         try {
+            console.log('Calling authApi.login...');
             const response = await authApi.login(data.email, data.password);
+            console.log('Login response:', response);
             await login(response.access_token);
             navigate('/');
         } catch (err: any) {
+            console.error('Login error:', err);
             setError('Invalid email or password');
         } finally {
             setLoading(false);

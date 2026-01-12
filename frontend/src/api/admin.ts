@@ -13,6 +13,9 @@ export interface User {
     name: string;
     role: string;
     is_active: boolean;
+    manager_id?: number | null;
+    start_date?: string | null;
+    approvers?: User[];
 }
 
 export const adminApi = {
@@ -38,5 +41,14 @@ export const adminApi = {
     createUser: async (user: any): Promise<User> => {
         const response = await apiClient.post<User>('/users', user);
         return response.data;
+    },
+
+    updateUser: async (id: number, user: any): Promise<User> => {
+        const response = await apiClient.put<User>(`/users/${id}`, user);
+        return response.data;
+    },
+
+    deleteUser: async (id: number): Promise<void> => {
+        await apiClient.delete(`/users/${id}`);
     }
 };
