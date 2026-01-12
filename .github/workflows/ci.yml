@@ -48,15 +48,39 @@ jobs:
 
   test-frontend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
       
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: pip install -r requirements.txt
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
       
-      - name: Install dependencies
+      - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
       
@@ -72,8 +96,20 @@ jobs:
         working-directory: ./frontend
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          SECRET_KEY: test-secret-key
+          PYTHONPATH: ../backend
         run: |
-          # The e2e tests need the backend. In a simple setup like this, 
-          # we might need to start both. But for now let's just enable the command.
-          # Ideally, you'd use a docker-compose or a more complex setup to run both.
+          # Run migrations and seed data
+          cd ../backend
+          alembic upgrade head
+          python seed_data.py
+          # Start backend in background
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          # Wait for backend to be ready
+          until curl -s http://localhost:8000/api/v1/health; do
+            echo "Waiting for backend..."
+            sleep 2
+          done
+          # Back to frontend and run E2E
+          cd ../frontend
           npm run test:e2e
