@@ -2,7 +2,48 @@
 
 A web application for managing employee vacation requests in small companies.
 
-## features
+## Problem Statement
+
+Small and medium-sized companies often struggle with manual vacation tracking through emails, spreadsheets, or paper forms. This leads to:
+- Lost or forgotten vacation requests
+- Conflicting time-off approvals when multiple employees request the same dates
+- Difficulty tracking remaining vacation balances
+- No central visibility into team availability
+- Time-consuming manual approval processes for managers
+
+**Vacation Manager** solves these problems by providing a centralized, automated system for the complete vacation request lifecycle.
+
+## What This System Does
+
+This application provides a comprehensive vacation management solution with three user roles:
+
+**For Employees:**
+- Submit vacation requests with automatic business day calculation (excluding weekends and public holidays)
+- View real-time vacation balance across different leave types (paid, unpaid, sick leave, etc.)
+- Track request status (pending, approved, rejected)
+- View team calendar to see who's out and when
+- Cancel pending requests before approval
+
+**For Managers:**
+- Review and approve/reject vacation requests from their team
+- View team availability calendar to avoid conflicts
+- See all pending requests requiring action
+- Add comments when approving or rejecting requests
+
+**For Administrators:**
+- Manage users and assign managers to employees
+- Configure vacation types (paid leave, sick leave, etc.) with custom colors and default balances
+- Set up public holidays that automatically affect business day calculations
+- View organization-wide vacation statistics and calendar
+
+**Key Benefits:**
+- Automated balance tracking and deduction upon approval
+- Business day calculation that excludes weekends and configured public holidays
+- Centralized team calendar for visibility into who's available
+- Role-based access control ensuring employees can only view their own data
+- Complete audit trail of all requests and approvals
+
+## Features
 
 - 🏖️ Submit vacation requests
 - ✅ Manager approval workflow
@@ -13,9 +54,88 @@ A web application for managing employee vacation requests in small companies.
 
 ## Tech Stack
 
-- **Frontend:** React, TypeScript, Tailwind CSS
-- **Backend:** FastAPI, SQLAlchemy, PostgreSQL
-- **Deployment:** Render
+### Frontend
+- **Framework:** React 18 with Vite build tool for fast development and optimized production builds
+- **Language:** TypeScript for type safety and better developer experience
+- **Styling:** Tailwind CSS for utility-first responsive design
+- **State Management:** React Context API + Hooks for authentication and local state
+- **HTTP Client:** Axios with interceptors for JWT token management and error handling
+- **Routing:** React Router v6 for client-side navigation
+- **Role:** Serves as the user interface, communicates with backend API for all data operations
+
+### Backend
+- **Framework:** FastAPI (Python 3.11) for high-performance async API
+- **ORM:** SQLAlchemy 2.0 with async support for database operations
+- **Database:** PostgreSQL 15 for production, SQLite for local development
+- **Authentication:** JWT (JSON Web Tokens) with OAuth2PasswordBearer pattern
+- **Migrations:** Alembic for database schema version control
+- **Validation:** Pydantic for request/response validation and OpenAPI generation
+- **Role:** Handles business logic, authentication, database operations, and exposes RESTful API
+
+### Infrastructure & DevOps
+- **Containerization:** Docker with multi-stage builds for optimized images
+- **Orchestration:** Docker Compose for local multi-service development
+- **CI/CD:** GitHub Actions for automated testing and deployment
+- **Deployment Platform:** Render.com with Infrastructure as Code (render.yaml)
+- **Database Hosting:** Managed PostgreSQL on Render
+- **Static Hosting:** CDN-backed static site hosting for frontend
+- **Role:** Ensures consistent environments across development, testing, and production
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Browser                              │
+│                    (React + TypeScript)                      │
+└───────────────────────┬─────────────────────────────────────┘
+                        │ HTTPS
+                        │ JWT in Authorization header
+                        ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Frontend (Port 3000)                      │
+│                      Nginx Server                            │
+│  • Serves static React build from /dist                     │
+│  • Proxies /api/v1/* to backend:8000                        │
+└───────────────────────┬─────────────────────────────────────┘
+                        │ HTTP (internal Docker network)
+                        ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Backend (Port 8000)                       │
+│                   FastAPI + Uvicorn                          │
+│  • REST API with OpenAPI documentation                      │
+│  • JWT authentication & authorization                        │
+│  • Business logic & validation                              │
+│  • SQLAlchemy ORM for database access                       │
+└───────────────────────┬─────────────────────────────────────┘
+                        │ Async SQLAlchemy
+                        │ PostgreSQL protocol
+                        ↓
+┌─────────────────────────────────────────────────────────────┐
+│                  Database (Port 5432)                        │
+│                    PostgreSQL 15                             │
+│  • Users & authentication data                              │
+│  • Vacation requests & approvals                            │
+│  • Vacation types & balances                                │
+│  • Public holidays                                          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Request Flow Example:**
+1. User logs in via React form → POST /api/v1/auth/login
+2. Nginx proxies to FastAPI backend
+3. Backend validates credentials against PostgreSQL
+4. Returns JWT token to frontend
+5. Frontend stores token in localStorage
+6. Subsequent requests include token in Authorization header
+7. Backend validates JWT and processes authorized requests
+
+**Key Architecture Decisions:**
+- **Async Everything:** FastAPI + async SQLAlchemy for high concurrency
+- **JWT Authentication:** Stateless auth enables horizontal scaling
+- **OpenAPI First:** API contract drives both backend and frontend development
+- **Docker Compose:** Ensures identical environments across all development machines
+- **Nginx Proxy:** Eliminates CORS issues and provides single origin for frontend
+- **PostgreSQL:** ACID compliance for critical vacation balance transactions
 
 ## Quick Start
 
@@ -73,13 +193,21 @@ Or run with coverage:
 npm run test:coverage
 ```
 
+### Integration Tests (E2E)
+Run end-to-end integration tests using Playwright:
+```bash
+cd frontend
+npx playwright test
+```
+
+
 ## Deployment
 
 This project is deployed on [Render.com](https://render.com) using their Blueprint feature.
 
 ### Live Deployment
 
-- **Frontend:** https://vacation-frontend-88rw.onrender.com
+- **Frontend:** https://vacation-frontend-88rw.onrender.com/
 - **Backend API:** https://vacation-backend-a87n.onrender.com/api/v1/docs
 - **Health Check:** https://vacation-backend-a87n.onrender.com/api/v1/health
 

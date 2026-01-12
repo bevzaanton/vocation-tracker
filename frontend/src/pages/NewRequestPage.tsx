@@ -64,8 +64,9 @@ export default function NewRequestPage() {
                 <div className="bg-white shadow rounded-lg p-6">
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Vacation Type</label>
+                            <label htmlFor="type_id" className="block text-sm font-medium text-gray-700">Vacation Type</label>
                             <select
+                                id="type_id"
                                 className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                                 {...register('type_id', { required: true })}
                             >
@@ -91,16 +92,18 @@ export default function NewRequestPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                                <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">Start Date</label>
                                 <input
+                                    id="start_date"
                                     type="date"
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     {...register('start_date', { required: true })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">End Date</label>
+                                <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">End Date</label>
                                 <input
+                                    id="end_date"
                                     type="date"
                                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     {...register('end_date', { required: true })}
@@ -109,8 +112,9 @@ export default function NewRequestPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Comment (Optional)</label>
+                            <label htmlFor="comment" className="block text-sm font-medium text-gray-700">Comment (Optional)</label>
                             <textarea
+                                id="comment"
                                 rows={3}
                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 {...register('comment')}

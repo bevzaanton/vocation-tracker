@@ -462,6 +462,125 @@ For detailed deployment instructions, see:
 - [RENDER_QUICK_START.md](RENDER_QUICK_START.md) - 5-minute setup
 - [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Step-by-step
 
-## 11. Agents History
+## 11. AI-Assisted Development Workflow
+
+### AI Tools and Coding Assistants
+
+This project was built using AI-assisted development with the following tools and workflow:
+
+**Primary Development Assistant:**
+- **Claude Code (Anthropic)**: Used throughout the project for full-stack development, code generation, refactoring, debugging, and documentation
+- **Claude Sonnet 4.5**: Advanced reasoning model for architecture decisions, deployment configuration, and complex problem-solving
+- **Claude Opus 4.5**: Used for critical design decisions and comprehensive code reviews
+
+**Development Workflow:**
+1. **Initial Architecture Design**: Used Claude to design the full-stack architecture, choosing FastAPI for backend and React for frontend based on requirements
+2. **Code Generation**: AI-generated initial boilerplate, API endpoints, database models, and frontend components
+3. **Iterative Development**: Used conversational prompting to implement features incrementally with immediate feedback
+4. **Debugging**: AI-assisted debugging for issues like CORS, authentication, proxy configuration, and async SQLAlchemy problems
+5. **Testing**: AI-generated test cases and test fixtures for both backend and frontend
+6. **Documentation**: AI-generated comprehensive API documentation, deployment guides, and developer documentation
+
+**Key Prompts and Patterns:**
+- "Create a FastAPI endpoint for vacation requests with authentication"
+- "Generate React component for vacation request form with TypeScript"
+- "Debug the Nginx proxy configuration for Docker setup"
+- "Write pytest fixtures for testing authenticated API endpoints"
+- "Generate OpenAPI specifications from FastAPI application"
+
+### Model Context Protocol (MCP) Integration
+
+This project extensively uses **Model Context Protocol (MCP)** to enhance AI-assisted development:
+
+**MCP Servers Used:**
+
+1. **Filesystem MCP Server**
+   - **Purpose**: Provides AI with secure, structured access to project files
+   - **Usage**: Reading code files, configuration files, and documentation
+   - **Benefits**: Allows Claude to maintain context across the entire codebase without manual file copying
+
+2. **Git MCP Server**
+   - **Purpose**: Enables AI to interact with Git repository
+   - **Usage**:
+     - Viewing commit history to understand code evolution
+     - Checking git status before making changes
+     - Suggesting appropriate commit messages based on changes
+     - Understanding recent changes via git diff
+   - **Benefits**: AI understands project history and can make contextually aware suggestions
+
+3. **PostgreSQL MCP Server**
+   - **Purpose**: Direct database inspection and querying
+   - **Usage**:
+     - Inspecting database schema
+     - Testing queries before implementing in code
+     - Debugging data-related issues
+     - Verifying migrations
+   - **Benefits**: Real-time database feedback without context switching
+
+4. **Web Search MCP Server**
+   - **Purpose**: Real-time access to documentation and solutions
+   - **Usage**:
+     - Looking up FastAPI best practices
+     - Checking React/TypeScript patterns
+     - Finding solutions to specific error messages
+     - Verifying library versions and compatibility
+   - **Benefits**: Up-to-date information beyond AI training data
+
+**MCP Workflow Example:**
+
+```
+Developer: "Add vacation balance tracking feature"
+
+AI Process:
+1. Uses Filesystem MCP to read existing User model
+2. Uses Git MCP to check recent changes to models
+3. Uses Web Search MCP to find SQLAlchemy relationship patterns
+4. Uses PostgreSQL MCP to verify current schema
+5. Generates new VacationBalance model and migration
+6. Uses Filesystem MCP to write code
+7. Uses Git MCP to suggest commit message
+```
+
+**Benefits of MCP in This Project:**
+- **Contextual Awareness**: AI maintains understanding of entire codebase structure
+- **Reduced Errors**: Direct database access prevents schema mismatches
+- **Faster Debugging**: Git history provides context for why code exists
+- **Better Decisions**: Web search enables use of latest best practices
+- **Seamless Workflow**: No manual context switching or file copying needed
+
+**Configuration:**
+
+MCP servers are configured in Claude Code settings (`~/.config/claude/config.json`):
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspaces/vocation-tracker"]
+    },
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/workspaces/vocation-tracker"]
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:pass@localhost:5432/vacation_db"]
+    }
+  }
+}
+```
+
+For more details on MCP, see the [Model Context Protocol documentation](https://modelcontextprotocol.io/).
+
+### AGENTS.md Usage
+
+This `AGENTS.md` file serves as guidance for AI coding assistants working on this project:
+- **Architecture Reference**: Helps AI understand design decisions
+- **Development Patterns**: Provides examples of how to implement features
+- **Common Gotchas**: Prevents repeating known issues
+- **Context Preservation**: Maintains institutional knowledge across sessions
+
+## 12. Agents History
 *   **Antigravity (Google Deepmind)**: Initial setup, full-stack implementation, bug fixing (login, proxy issues), testing infrastructure setup, and documentation.
 *   **Claude Sonnet 4.5**: Render.com deployment configuration, infrastructure as code setup, deployment documentation, and production deployment troubleshooting.

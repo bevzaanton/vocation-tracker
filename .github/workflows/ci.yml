@@ -38,13 +38,12 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-asyncio httpx
       
-      # We will enable this once we have tests
-      # - name: Run tests
-      #   working-directory: ./backend
-      #   env:
-      #     DATABASE_URL: postgresql://test:test@localhost:5432/test_db
-      #     SECRET_KEY: test-secret-key
-      #   run: pytest -v
+      - name: Run tests
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+          SECRET_KEY: test-secret-key
+        run: pytest -v
 
   test-frontend:
     runs-on: ubuntu-latest
@@ -60,7 +59,20 @@ jobs:
         working-directory: ./frontend
         run: npm ci
       
-      # Enable once we have tests
-      # - name: Run tests
-      #   working-directory: ./frontend
-      #   run: npm run test
+      - name: Run unit tests
+        working-directory: ./frontend
+        run: npm run test
+      
+      - name: Install Playwright Browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+      
+      - name: Run E2E tests
+        working-directory: ./frontend
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+        run: |
+          # The e2e tests need the backend. In a simple setup like this, 
+          # we might need to start both. But for now let's just enable the command.
+          # Ideally, you'd use a docker-compose or a more complex setup to run both.
+          npm run test:e2e
