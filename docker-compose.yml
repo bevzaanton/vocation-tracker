@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/vacation_db
+      - SECRET_KEY=dev_secret_key_123
+    depends_on:
+      - db
+    networks:
+      - vacation-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - vacation-network
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=vacation_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - vacation-network
+
+networks:
+  vacation-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
