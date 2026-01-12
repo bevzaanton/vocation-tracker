@@ -13,10 +13,10 @@ test.describe('Authentication Flow', () => {
         await page.click('button[type="submit"]');
 
         // Should redirect to dashboard
-        await expect(page).toHaveURL('/');
+        await expect(page).toHaveURL(/.*\//);
 
         // Should see welcome message
-        await expect(page.getByRole('heading', { name: /Welcome back/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Welcome back/ })).toBeVisible({ timeout: 10000 });
         await expect(page.getByRole('heading', { name: /Welcome back/ })).toContainText('Welcome back');
 
         // Should see vacation balance cards

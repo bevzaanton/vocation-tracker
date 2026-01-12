@@ -29,7 +29,7 @@ apiClient.interceptors.response.use(
         return response;
     },
     (error) => {
-        if (error.response && error.response.status === 401) {
+        if (error.response && error.response.status === 401 && !window.location.pathname.includes('/login')) {
             // Clear local storage and redirect to login
             localStorage.removeItem('token');
             window.location.href = '/login';
