@@ -16,7 +16,8 @@ test.describe('Authentication Flow', () => {
         await expect(page).toHaveURL('/');
 
         // Should see welcome message
-        await expect(page.locator('h1')).toContainText('Welcome back');
+        await expect(page.getByRole('heading', { name: /Welcome back/ })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /Welcome back/ })).toContainText('Welcome back');
 
         // Should see vacation balance cards
         await expect(page.locator('.grid >> div >> h3').first()).toBeVisible();
@@ -29,6 +30,7 @@ test.describe('Authentication Flow', () => {
         await page.fill('input[type="password"]', 'wrongpassword');
         await page.click('button[type="submit"]');
 
-        await expect(page.locator('text=Invalid email or password')).toBeVisible();
+        await expect(page.locator('#login-error')).toBeVisible();
+        await expect(page.locator('#login-error')).toContainText('Invalid email or password');
     });
 });
