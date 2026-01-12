@@ -72,7 +72,7 @@ export default function ApprovalsPage() {
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0">
-                                                    <span className="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-500">
+                                                    <span className="flex items-center justify-center h-10 w-10 rounded-full bg-gray-500">
                                                         <span className="text-sm font-medium leading-none text-white">{request.user_name.charAt(0)}</span>
                                                     </span>
                                                 </div>
