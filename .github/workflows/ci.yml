@@ -99,17 +99,32 @@ jobs:
           SECRET_KEY: test-secret-key
           PYTHONPATH: ../backend
         run: |
+          set -e
           # Run migrations and seed data
           cd ../backend
           alembic upgrade head
           python seed_data.py
-          # Start backend in background
-          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-          # Wait for backend to be ready
-          until curl -s http://localhost:8000/api/v1/health; do
-            echo "Waiting for backend..."
+          # Start backend in background, redirect logs to a file
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 > ../backend.log 2>&1 &
+          BACKEND_PID=$!
+          
+          # Wait for backend to be ready with a timeout
+          echo "Waiting for backend on 127.0.0.1:8000..."
+          MAX_RETRIES=30
+          COUNT=0
+          until curl -s http://127.0.0.1:8000/api/v1/health || [ $COUNT -eq $MAX_RETRIES ]; do
+            echo "Waiting for backend ($COUNT/$MAX_RETRIES)..."
             sleep 2
+            ((COUNT++))
           done
+          
+          if [ $COUNT -eq $MAX_RETRIES ]; then
+            echo "Backend failed to start in time. Logs:"
+            cat ../backend.log
+            exit 1
+          fi
+          
+          echo "Backend is healthy!"
           # Back to frontend and run E2E
           cd ../frontend
           npm run test:e2e
