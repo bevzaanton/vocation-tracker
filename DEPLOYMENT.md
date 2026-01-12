@@ -103,11 +103,9 @@ If you prefer manual setup:
    VITE_API_URL=https://vacation-backend.onrender.com/api/v1
    ```
 
-5. **Redirects/Rewrites** (in render.yaml or dashboard):
-   ```
-   /api/* -> https://vacation-backend.onrender.com/api/* (200)
-   /* -> /index.html (200)
-   ```
+5. **Redirects/Rewrites** (configure in dashboard after creation if needed):
+   - Most SPA routing is handled by the build (index.html fallback)
+   - API calls should use full backend URL via VITE_API_URL
 
 6. Click "Create Static Site"
 

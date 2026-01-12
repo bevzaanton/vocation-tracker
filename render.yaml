@@ -30,21 +30,8 @@ services:
   - type: web
     name: vacation-frontend
     runtime: static
-    region: oregon
-    plan: starter
     buildCommand: "cd frontend && npm ci && npm run build"
     staticPublishPath: ./frontend/dist
-    routes:
-      - type: rewrite
-        source: /api/*
-        destination: https://vacation-backend.onrender.com/api/*
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: SAMEORIGIN
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
     envVars:
       - key: VITE_API_URL
         value: https://vacation-backend.onrender.com/api/v1
