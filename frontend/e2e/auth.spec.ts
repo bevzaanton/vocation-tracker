@@ -13,7 +13,7 @@ test.describe('Authentication Flow', () => {
         await page.click('button[type="submit"]');
 
         // Should redirect to dashboard
-        await expect(page).toHaveURL(/.*\//);
+        await expect(page).toHaveURL(/\/$/);
 
         // Should see welcome message
         await expect(page.getByRole('heading', { name: /Welcome back/ })).toBeVisible({ timeout: 10000 });
