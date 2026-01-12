@@ -77,8 +77,8 @@
 #### 3. Database (vacation-postgres)
 - **Type:** PostgreSQL 15
 - **Region:** Oregon
-- **Plan:** Starter
-- **Auto-Backups:** Available on paid plans
+- **Plan:** Free (1GB storage, expires after 90 days)
+- **Auto-Backups:** Available on paid plans only
 
 ---
 

@@ -4,7 +4,7 @@ services:
     name: vacation-backend
     runtime: python
     region: oregon
-    plan: starter
+    plan: free
     rootDir: backend
     buildCommand: "./build.sh"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
@@ -40,6 +40,6 @@ services:
 databases:
   - name: vacation-postgres
     databaseName: vacation_db
-    plan: starter
+    plan: free
     region: oregon
     postgresMajorVersion: 15

@@ -62,15 +62,17 @@ Default credentials:
 ## 💰 Costs
 
 ### Free Tier
-- ✅ Services spin down after 15 min inactivity
-- ✅ Database: 1GB storage, 97 hours/month
-- ✅ Perfect for testing
+- ✅ Backend: Free (spins down after 15 min inactivity)
+- ✅ Database: Free (1GB storage, expires after 90 days)
+- ✅ Frontend: Free (always on, CDN)
+- ⚠️ **Database expires after 90 days on free tier**
+- ✅ Perfect for testing and demos
 
-### Starter (Recommended for Production)
-- Backend: $7/month
-- Database: $7/month
+### Paid Plans (Recommended for Production)
+- Backend: Starting at $7/month
+- Database: Basic-1gb at $7/month (persistent, no expiration)
 - Frontend: Free
-- **Total: $14/month**
+- **Total: $14+/month**
 
 ## ⚠️ Important Notes
 
