@@ -75,20 +75,36 @@ npm run test:coverage
 
 ## Deployment
 
-This project is ready to deploy on [Render.com](https://render.com). See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete deployment instructions.
+This project is deployed on [Render.com](https://render.com) using their Blueprint feature.
 
-### Quick Deploy to Render
+### Live Deployment
 
-1. Push your code to GitHub
-2. Go to [Render Dashboard](https://dashboard.render.com)
-3. Click "New +" → "Blueprint"
-4. Connect your repository
-5. Render will automatically detect `render.yaml` and create:
-   - PostgreSQL database
-   - Backend API service
-   - Frontend static site
+- **Frontend:** https://vacation-frontend-88rw.onrender.com
+- **Backend API:** https://vacation-backend-a87n.onrender.com/api/v1/docs
+- **Health Check:** https://vacation-backend-a87n.onrender.com/api/v1/health
 
-For manual deployment, custom domains, environment variables, and troubleshooting, see the full [Deployment Guide](DEPLOYMENT.md).
+### Default Login Credentials
+
+- **Admin:** admin@company.com / password123
+- **Manager:** manager@company.com / password123
+- **Employee:** employee1@company.com / password123
+
+⚠️ **Note:** Free tier services spin down after 15 minutes of inactivity. First request may take 30-60 seconds.
+
+### Deploy Your Own Instance
+
+1. Fork/clone this repository
+2. Push your code to GitHub
+3. Go to [Render Dashboard](https://dashboard.render.com)
+4. Click "New +" → "Blueprint"
+5. Connect your repository
+6. Render will automatically detect `render.yaml` and create:
+   - PostgreSQL database (free tier, 1GB, 90-day expiration)
+   - Backend API service (Python/FastAPI)
+   - Frontend static site (React)
+7. After deployment, seed the database via backend Shell: `python seed_data.py`
+
+For detailed instructions, custom domains, and production setup, see the full [Deployment Guide](DEPLOYMENT.md).
 
 ## API Documentation
 
