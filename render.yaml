@@ -23,7 +23,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: FRONTEND_URL
-        value: https://vacation-frontend.onrender.com
+        value: https://vacation-frontend-88rw.onrender.com
     autoDeploy: true
 
   # Frontend Static Site
@@ -31,10 +31,10 @@ services:
     name: vacation-frontend
     runtime: static
     buildCommand: "cd frontend && npm ci && npm run build"
-    staticPublishPath: ./frontend/dist
+    staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://vacation-backend.onrender.com/api/v1
+        value: https://vacation-backend-a87n.onrender.com/api/v1
     autoDeploy: true
 
 databases:
