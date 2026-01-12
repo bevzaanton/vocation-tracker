@@ -71,5 +71,25 @@
 *   **Advanced Reporting**: CSV export of leave history.
 *   **Slack/Telegram Bot**: Integration for quick approvals.
 
-## 6. Agents History
-*   **Antigravity (Google Deepmind)**: Initial setup, full-stack implementation, bug fixing (login, proxy issues), and documentation.
+## 7. Testing Strategy
+
+### Backend
+*   **Framework**: `pytest`
+*   **Plugins**: `pytest-cov`, `pytest-asyncio`
+*   **Location**: `backend/app/tests`
+*   **Fixtures**: `conftest.py` provides async database sessions with automatic rollbacks.
+*   **Commands**:
+    *   Full test run: `pytest`
+    *   With coverage: `pytest --cov=app app/tests`
+
+### Frontend
+*   **Framework**: `Vitest`
+*   **Library**: `React Testing Library` (RTL)
+*   **Environment**: `jsdom`
+*   **Setup**: `frontend/src/test/setup.ts`
+*   **Commands**:
+    *   Run tests: `npm run test`
+    *   With coverage: `npm run test:coverage`
+
+## 8. Agents History
+*   **Antigravity (Google Deepmind)**: Initial setup, full-stack implementation, bug fixing (login, proxy issues), testing infrastructure setup, and documentation.

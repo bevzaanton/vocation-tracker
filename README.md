@@ -50,6 +50,26 @@ A web application for managing employee vacation requests in small companies.
 2. Install: `npm install`
 3. Run: `npm run dev`
 
+## Testing
+
+### Backend
+Run backend tests with coverage:
+```bash
+cd backend
+pytest --cov=app app/tests
+```
+
+### Frontend
+Run frontend tests:
+```bash
+cd frontend
+npm run test
+```
+Or run with coverage:
+```bash
+npm run test:coverage
+```
+
 ## Deployment
 configured for Render. Connect your repository to Render and use `docker-compose.yml` or individual Dockerfiles.
 
