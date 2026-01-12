@@ -44,7 +44,11 @@
 2.  **Access**:
     *   Frontend: http://localhost:3000
     *   Backend API: http://localhost:8000
-    *   Backend Docs: http://localhost:8000/api/v1/docs
+    *   **API Documentation**:
+        *   Swagger UI: http://localhost:8000/api/v1/docs (Interactive)
+        *   ReDoc: http://localhost:8000/api/v1/redoc (Alternative UI)
+        *   OpenAPI JSON: http://localhost:8000/api/v1/openapi.json
+        *   Static Docs: [backend/docs/API_DOCUMENTATION.md](backend/docs/API_DOCUMENTATION.md)
 3.  **Restarting Services**:
     *   Frontend only: `docker-compose restart frontend`
     *   Backend only: `docker-compose restart backend`
@@ -128,14 +132,165 @@ After modifying models in `backend/app/models/`, always:
 3. Apply the migration
 4. Update corresponding Pydantic schemas in `backend/app/schemas/`
 
-## 6. Common Development Patterns
+## 6. API Documentation
+
+The project includes comprehensive OpenAPI 3.1.0 specifications and documentation. All API endpoints, models, authentication, and business rules are fully documented.
+
+### Available Documentation Formats
+
+*   **Interactive Documentation** (when server is running):
+    *   **Swagger UI**: http://localhost:8000/api/v1/docs - Full interactive API explorer with request/response testing
+    *   **ReDoc**: http://localhost:8000/api/v1/redoc - Alternative clean documentation UI
+    *   **OpenAPI JSON**: http://localhost:8000/api/v1/openapi.json - Live OpenAPI specification endpoint
+
+*   **Static Documentation Files** (`backend/docs/`):
+    *   **API_DOCUMENTATION.md** - Comprehensive guide (18KB):
+        *   Complete endpoint reference with all parameters
+        *   Authentication and authorization details
+        *   Data models and schemas
+        *   Request/response examples with cURL
+        *   Business rules and workflows
+        *   Error handling patterns
+    *   **QUICK_REFERENCE.md** - Quick lookup guide:
+        *   Endpoint summary table
+        *   Common cURL examples
+        *   Query parameters reference
+        *   Status codes
+    *   **openapi.json** (43KB) - OpenAPI 3.1.0 specification in JSON format
+    *   **openapi.yaml** (28KB) - OpenAPI 3.1.0 specification in YAML format
+    *   **README.md** - Documentation guide with usage instructions
+
+### API Coverage
+
+The documentation covers all **19 endpoints** across **6 modules**:
+
+| Module | Endpoints | Features |
+|--------|-----------|----------|
+| **Authentication** | 2 | OAuth2/JWT login, user info |
+| **Users** | 5 | CRUD operations, balance tracking, role management |
+| **Vacation Types** | 2 | Leave type configuration |
+| **Public Holidays** | 2 | Holiday management |
+| **Vacation Requests** | 5 | Full request lifecycle (create, approve, reject, cancel) |
+| **Calendar** | 1 | Team availability view |
+
+### Regenerating OpenAPI Specs
+
+After modifying API endpoints, models, or adding documentation:
+
+```bash
+cd backend
+python generate_openapi.py
+```
+
+This script:
+*   Extracts the OpenAPI schema from the FastAPI application
+*   Generates `backend/docs/openapi.json`
+*   Generates `backend/docs/openapi.yaml`
+*   Reports total endpoint count and version info
+
+### Using OpenAPI Files for Development
+
+**Import into API Clients:**
+*   **Postman**: Import → File → Select `openapi.json` or `openapi.yaml`
+*   **Insomnia**: Create → Import From → File → Select `openapi.json` or `openapi.yaml`
+*   Automatically creates a full collection of all endpoints with proper authentication
+
+**Generate Client SDKs:**
+```bash
+# Install OpenAPI Generator
+npm install @openapitools/openapi-generator-cli -g
+
+# TypeScript/Fetch client
+openapi-generator-cli generate \
+  -i backend/docs/openapi.json \
+  -g typescript-fetch \
+  -o ./client-typescript
+
+# Python client
+openapi-generator-cli generate \
+  -i backend/docs/openapi.json \
+  -g python \
+  -o ./client-python
+
+# Java client
+openapi-generator-cli generate \
+  -i backend/docs/openapi.json \
+  -g java \
+  -o ./client-java
+```
+
+See [OpenAPI Generator docs](https://openapi-generator.tech/docs/generators) for 50+ supported languages.
+
+**Contract Testing:**
+*   Use tools like [Dredd](https://dredd.org/) or [Schemathesis](https://schemathesis.readthedocs.io/) to validate API responses against the OpenAPI spec
+*   Ensure API implementation matches documentation
+
+**API Linting:**
+```bash
+# Validate OpenAPI spec with Spectral
+npx @stoplight/spectral-cli lint backend/docs/openapi.json
+```
+
+### Enhancing API Documentation
+
+When adding new endpoints, enhance documentation by:
+
+1. **Add docstrings** to route functions:
+   ```python
+   @router.post("/requests", response_model=VacationRequestResponse)
+   async def create_request(
+       request: VacationRequestCreate,
+       current_user: User = Depends(get_current_user),
+       db: AsyncSession = Depends(get_db)
+   ):
+       """
+       Create a new vacation request.
+
+       - Calculates business days automatically (excludes weekends and holidays)
+       - Validates sufficient balance
+       - Sets initial status to 'pending'
+       """
+   ```
+
+2. **Add response descriptions**:
+   ```python
+   @router.post(
+       "/requests/{request_id}/approve",
+       response_model=VacationRequestResponse,
+       responses={
+           400: {"description": "Request not in pending status or insufficient balance"},
+           403: {"description": "User lacks manager/admin privileges"},
+           404: {"description": "Request not found"}
+       }
+   )
+   ```
+
+3. **Use clear parameter descriptions** in Pydantic models:
+   ```python
+   class VacationRequestCreate(BaseModel):
+       type_id: int = Field(..., description="ID of the vacation type")
+       start_date: date = Field(..., description="First day of vacation (inclusive)")
+       end_date: date = Field(..., description="Last day of vacation (inclusive)")
+       comment: Optional[str] = Field(None, description="Optional user comment")
+   ```
+
+4. **Regenerate specs** after changes:
+   ```bash
+   python backend/generate_openapi.py
+   ```
+
+For complete documentation guidelines, see `backend/docs/README.md`.
+
+## 7. Common Development Patterns
 
 ### Creating a New API Endpoint
 1. Define Pydantic schemas in `backend/app/schemas/` (request/response models)
 2. Add route handler in appropriate `backend/app/api/v1/*.py` file
-3. Import and register router in `backend/app/api/v1/router.py` if it's a new module
-4. Use `get_current_user` dependency for authentication (from `app.api.deps`)
-5. Use `get_db` dependency for database access (from `app.database`)
+3. Add docstrings and response descriptions for documentation
+4. Import and register router in `backend/app/api/v1/router.py` if it's a new module
+5. Use `get_current_user` dependency for authentication (from `app.api.deps`)
+6. Use `get_db` dependency for database access (from `app.database`)
+7. Regenerate OpenAPI specs: `python backend/generate_openapi.py`
 
 ### Adding a New Frontend Page
 1. Create component in `frontend/src/pages/`

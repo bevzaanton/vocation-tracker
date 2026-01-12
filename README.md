@@ -32,9 +32,12 @@ A web application for managing employee vacation requests in small companies.
    ```
    
 2. **Access the application:**
-   - Frontend: [http://localhost](http://localhost)
+   - Frontend: [http://localhost:3000](http://localhost:3000)
    - Backend API: [http://localhost:8000](http://localhost:8000)
-   - API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+   - **API Documentation:**
+     - Swagger UI: [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
+     - ReDoc: [http://localhost:8000/api/v1/redoc](http://localhost:8000/api/v1/redoc)
+     - OpenAPI JSON: [http://localhost:8000/api/v1/openapi.json](http://localhost:8000/api/v1/openapi.json)
 
 ### Local Development
 
@@ -75,4 +78,49 @@ configured for Render. Connect your repository to Render and use `docker-compose
 
 ## API Documentation
 
-OpenAPI specification available at `/docs` when running the backend.
+The project includes comprehensive OpenAPI 3.1.0 specifications and documentation:
+
+### Interactive Documentation
+
+When the backend is running, access interactive API documentation:
+- **Swagger UI:** [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs) - Test API endpoints directly in your browser
+- **ReDoc:** [http://localhost:8000/api/v1/redoc](http://localhost:8000/api/v1/redoc) - Alternative documentation UI
+- **OpenAPI Spec:** [http://localhost:8000/api/v1/openapi.json](http://localhost:8000/api/v1/openapi.json) - Raw OpenAPI JSON
+
+### Static Documentation
+
+Comprehensive documentation files are available in the `backend/docs/` directory:
+
+- **[API_DOCUMENTATION.md](backend/docs/API_DOCUMENTATION.md)** - Complete API reference with examples
+- **[QUICK_REFERENCE.md](backend/docs/QUICK_REFERENCE.md)** - Quick endpoint lookup and cURL examples
+- **[openapi.json](backend/docs/openapi.json)** - OpenAPI 3.1.0 specification (JSON)
+- **[openapi.yaml](backend/docs/openapi.yaml)** - OpenAPI 3.1.0 specification (YAML)
+- **[README.md](backend/docs/README.md)** - Documentation guide and usage instructions
+
+### Using OpenAPI Files
+
+The OpenAPI specifications can be:
+- Imported into **Postman** or **Insomnia** for API testing
+- Used to generate client SDKs with [OpenAPI Generator](https://openapi-generator.tech/)
+- Used for API contract testing and validation
+
+### Regenerating OpenAPI Specs
+
+After making changes to API endpoints or models:
+
+```bash
+cd backend
+python generate_openapi.py
+```
+
+### API Overview
+
+The API includes 19 endpoints across 6 modules:
+- **Authentication** - Login and user info
+- **Users** - User management and vacation balances
+- **Vacation Types** - Leave type configuration
+- **Public Holidays** - Holiday management
+- **Vacation Requests** - Request lifecycle (create, approve, reject, cancel)
+- **Calendar** - Team calendar view
+
+For detailed information, see [AGENTS.md](AGENTS.md) for development guidelines and architecture details.
