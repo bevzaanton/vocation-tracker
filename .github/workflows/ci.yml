@@ -43,6 +43,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test_db
           SECRET_KEY: test-secret-key
+          PYTHONPATH: .
         run: pytest -v
 
   test-frontend:
