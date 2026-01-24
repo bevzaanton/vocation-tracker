@@ -30,6 +30,7 @@
 *   **Styling**: TailwindCSS
 *   **State Management**: React Context + Hooks (local state).
 *   **HTTP Client**: Axios (configured with interceptors for JWT injection and 401 handling).
+*   **Internationalization**: react-i18next with i18next-browser-languagedetector
 *   **Proxy**: Vite is configured to proxy `/api` requests to `http://localhost:8000` to avoid CORS in dev.
 
 ### Infrastructure & DevOps
@@ -287,7 +288,71 @@ When adding new endpoints, enhance documentation by:
 
 For complete documentation guidelines, see `backend/docs/README.md`.
 
-## 7. Common Development Patterns
+## 7. Internationalization (i18n)
+
+The frontend supports multiple languages using react-i18next.
+
+### Current Languages
+- **English (en)** - Default language
+- **Ukrainian (uk)** - Full translation
+
+### i18n Structure
+```
+frontend/src/i18n/
+├── index.ts           # i18n configuration
+└── locales/
+    ├── en.json        # English translations
+    └── uk.json        # Ukrainian translations
+```
+
+### Adding a New Language
+1. Create a new translation file in `frontend/src/i18n/locales/` (e.g., `de.json`)
+2. Copy the structure from `en.json` and translate all values
+3. Register the new language in `frontend/src/i18n/index.ts`:
+   ```typescript
+   import de from './locales/de.json';
+
+   const resources = {
+     en: { translation: en },
+     uk: { translation: uk },
+     de: { translation: de },  // Add new language
+   };
+   ```
+4. Add the language option to `frontend/src/components/LanguageSwitcher.tsx`
+
+### Using Translations in Components
+```typescript
+import { useTranslation } from 'react-i18next';
+
+function MyComponent() {
+    const { t } = useTranslation();
+
+    return (
+        <h1>{t('nav.dashboard')}</h1>
+        <p>{t('dashboard.welcomeBack', { name: user?.name })}</p>
+    );
+}
+```
+
+### Translation Key Structure
+- `common.*` - Shared strings (buttons, labels)
+- `nav.*` - Navigation menu items
+- `login.*` - Login page
+- `dashboard.*` - Dashboard page
+- `requests.*` - Requests page
+- `newRequest.*` - New request form
+- `calendar.*` - Calendar page
+- `approvals.*` - Approvals page
+- `admin.holidays.*` - Holiday management
+- `admin.users.*` - User management
+- `language.*` - Language names
+
+### Language Persistence
+- Language preference is stored in `localStorage`
+- Browser language is auto-detected on first visit
+- Falls back to English if detected language is not supported
+
+## 8. Common Development Patterns
 
 ### Creating a New API Endpoint
 1. Define Pydantic schemas in `backend/app/schemas/` (request/response models)
@@ -316,13 +381,13 @@ For complete documentation guidelines, see `backend/docs/README.md`.
 - `apiClient` automatically adds JWT token to requests via interceptor
 - 401 responses automatically trigger logout and redirect to login page
 
-## 7. Future Tasks / Roadmap
+## 9. Future Tasks / Roadmap
 *   **Email Notifications**: Send emails on status changes.
 *   **Calendar Export**: iCal feed for Google Calendar integration.
 *   **Advanced Reporting**: CSV export of leave history.
 *   **Slack/Telegram Bot**: Integration for quick approvals.
 
-## 8. Code Architecture Details
+## 10. Code Architecture Details
 
 ### Backend API Layer
 **Route Organization (`backend/app/api/v1/`):**
@@ -374,7 +439,7 @@ For complete documentation guidelines, see `backend/docs/README.md`.
 - Backend connects to database at `db:5432` (internal Docker service name)
 - Host accesses frontend at `localhost:3000` (mapped from container port 80)
 
-## 9. Testing Strategy
+## 11. Testing Strategy
 
 ### Backend
 *   **Framework**: `pytest`
@@ -407,7 +472,7 @@ For complete documentation guidelines, see `backend/docs/README.md`.
     npm run test:coverage     # Run with coverage report
     ```
 
-## 10. Production Deployment
+## 12. Production Deployment
 
 ### Render.com Deployment
 
@@ -462,7 +527,7 @@ For detailed deployment instructions, see:
 - [RENDER_QUICK_START.md](RENDER_QUICK_START.md) - 5-minute setup
 - [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Step-by-step
 
-## 11. AI-Assisted Development Workflow
+## 13. AI-Assisted Development Workflow
 
 ### AI Tools and Coding Assistants
 
@@ -581,6 +646,6 @@ This `AGENTS.md` file serves as guidance for AI coding assistants working on thi
 - **Common Gotchas**: Prevents repeating known issues
 - **Context Preservation**: Maintains institutional knowledge across sessions
 
-## 12. Agents History
+## 14. Agents History
 *   **Antigravity (Google Deepmind)**: Initial setup, full-stack implementation, bug fixing (login, proxy issues), testing infrastructure setup, and documentation.
 *   **Claude Sonnet 4.5**: Render.com deployment configuration, infrastructure as code setup, deployment documentation, and production deployment troubleshooting.
