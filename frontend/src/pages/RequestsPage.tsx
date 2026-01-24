@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { requestApi, type VacationRequest } from '../api/requests';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { cn } from '../utils/cn';
@@ -10,20 +10,33 @@ export default function RequestsPage() {
     const [requests, setRequests] = useState<VacationRequest[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchRequests = async () => {
-            try {
-                const data = await requestApi.getRequests();
-                setRequests(data);
-            } catch (error) {
-                console.error('Failed to fetch requests', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchRequests = async () => {
+        try {
+            const data = await requestApi.getRequests();
+            setRequests(data);
+        } catch (error) {
+            console.error('Failed to fetch requests', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchRequests();
     }, []);
+
+    const handleCancel = async (id: number) => {
+        if (!confirm('Are you sure you want to cancel this vacation request?')) {
+            return;
+        }
+        try {
+            await requestApi.cancelRequest(id);
+            fetchRequests(); // Refresh list
+        } catch (error) {
+            console.error('Failed to cancel', error);
+            alert('Failed to cancel request. Please try again.');
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -71,10 +84,20 @@ export default function RequestsPage() {
                                                     {request.type_name}
                                                 </p>
                                             </div>
-                                            <div className="ml-2 flex-shrink-0 flex">
+                                            <div className="ml-2 flex-shrink-0 flex items-center space-x-2">
                                                 <p className={cn("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", getStatusColor(request.status))}>
                                                     {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                                                 </p>
+                                                {(request.status === 'pending' || request.status === 'approved') && (
+                                                    <button
+                                                        onClick={() => handleCancel(request.id)}
+                                                        className="inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded text-white bg-orange-600 hover:bg-orange-700"
+                                                        title="Cancel this request"
+                                                    >
+                                                        <XCircle className="h-3 w-3 mr-1" />
+                                                        Cancel
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="mt-2 sm:flex sm:justify-between">

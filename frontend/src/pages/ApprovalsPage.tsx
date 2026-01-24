@@ -2,27 +2,21 @@ import { useEffect, useState } from 'react';
 import Layout from '../components/layout/Layout';
 import { requestApi, type VacationRequest } from '../api/requests';
 import apiClient from '../api/client';
-import { Loader2, Check, X } from 'lucide-react';
+import { Loader2, Check, X, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAuth } from '../context/AuthContext';
+import { cn } from '../utils/cn';
 
 export default function ApprovalsPage() {
     const [requests, setRequests] = useState<VacationRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState<'pending' | 'all'>('pending');
+    const { user } = useAuth();
 
     const fetchRequests = async () => {
         try {
-            // Logic for approvals: get all requests (filtered by manager permission in backend)
-            // The backend 'getRequests' should already filter based on manager view if implemented correctly.
-            // In our current backend implementation, it fetches logic for Manager to see own requests?
-            // Wait, in backend `read_requests`:
-            // `if current_user.role == "manager": pass` -> means it returns ALL requests currently as I didn't implement the filtering 
-            // strictly for direct reports yet. Ideally we should add that, but for now this page will show all requests if backend returns valid data.
-            // Let's rely on backend returning what we need.
-
             const data = await requestApi.getRequests();
-            // Filter client side for PENDING only for this view
-            const pending = data.filter(r => r.status === 'pending');
-            setRequests(pending);
+            setRequests(data);
         } catch (error) {
             console.error('Failed to fetch requests', error);
         } finally {
@@ -52,9 +46,58 @@ export default function ApprovalsPage() {
         }
     };
 
+    const handleCancel = async (id: number) => {
+        try {
+            await requestApi.cancelRequest(id);
+            fetchRequests(); // Refresh list
+        } catch (error) {
+            console.error('Failed to cancel', error);
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'approved': return 'bg-green-100 text-green-800';
+            case 'rejected': return 'bg-red-100 text-red-800';
+            case 'pending': return 'bg-yellow-100 text-yellow-800';
+            case 'cancelled': return 'bg-gray-100 text-gray-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const filteredRequests = filter === 'pending'
+        ? requests.filter(r => r.status === 'pending')
+        : requests;
+
     return (
         <Layout>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Pending Approvals</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Manage Requests</h1>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={() => setFilter('pending')}
+                        className={cn(
+                            "px-4 py-2 text-sm font-medium rounded-md",
+                            filter === 'pending'
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        )}
+                    >
+                        Pending Only
+                    </button>
+                    <button
+                        onClick={() => setFilter('all')}
+                        className={cn(
+                            "px-4 py-2 text-sm font-medium rounded-md",
+                            filter === 'all'
+                                ? "bg-blue-600 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        )}
+                    >
+                        All Requests
+                    </button>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="flex justify-center p-8">
@@ -62,11 +105,13 @@ export default function ApprovalsPage() {
                 </div>
             ) : (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                    {requests.length === 0 ? (
-                        <div className="p-6 text-center text-gray-500">No pending approvals.</div>
+                    {filteredRequests.length === 0 ? (
+                        <div className="p-6 text-center text-gray-500">
+                            {filter === 'pending' ? 'No pending approvals.' : 'No requests found.'}
+                        </div>
                     ) : (
                         <ul className="divide-y divide-gray-200">
-                            {requests.map((request) => (
+                            {filteredRequests.map((request) => (
                                 <li key={request.id}>
                                     <div className="px-4 py-4 sm:px-6">
                                         <div className="flex items-center justify-between">
@@ -79,21 +124,36 @@ export default function ApprovalsPage() {
                                                 <div className="ml-4">
                                                     <div className="text-sm font-medium text-gray-900">{request.user_name}</div>
                                                     <div className="text-sm text-gray-500">{request.type_name}</div>
+                                                    <p className={cn("mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full", getStatusColor(request.status))}>
+                                                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="flex space-x-2">
-                                                <button
-                                                    onClick={() => handleApprove(request.id)}
-                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700"
-                                                >
-                                                    <Check className="mr-1 h-3 w-3" /> Approve
-                                                </button>
-                                                <button
-                                                    onClick={() => handleReject(request.id)}
-                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700"
-                                                >
-                                                    <X className="mr-1 h-3 w-3" /> Reject
-                                                </button>
+                                                {request.status === 'pending' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleApprove(request.id)}
+                                                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700"
+                                                        >
+                                                            <Check className="mr-1 h-3 w-3" /> Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleReject(request.id)}
+                                                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700"
+                                                        >
+                                                            <X className="mr-1 h-3 w-3" /> Reject
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {(request.status === 'approved' || request.status === 'pending') && user?.role === 'admin' && (
+                                                    <button
+                                                        onClick={() => handleCancel(request.id)}
+                                                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-orange-600 hover:bg-orange-700"
+                                                    >
+                                                        <XCircle className="mr-1 h-3 w-3" /> Cancel
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="mt-2 sm:flex sm:justify-between">
