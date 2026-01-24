@@ -43,6 +43,21 @@ export const requestApi = {
         return response.data;
     },
 
+    approveRequest: async (requestId: number): Promise<VacationRequest> => {
+        const response = await apiClient.post<VacationRequest>(`/requests/${requestId}/approve`);
+        return response.data;
+    },
+
+    rejectRequest: async (requestId: number): Promise<VacationRequest> => {
+        const response = await apiClient.post<VacationRequest>(`/requests/${requestId}/reject`);
+        return response.data;
+    },
+
+    cancelRequest: async (requestId: number): Promise<VacationRequest> => {
+        const response = await apiClient.post<VacationRequest>(`/requests/${requestId}/cancel`);
+        return response.data;
+    },
+
     getVacationTypes: async (): Promise<VacationType[]> => {
         const response = await apiClient.get<VacationType[]>('/vacation-types/');
         return response.data;

@@ -185,14 +185,16 @@ async def cancel_request(
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
-    Cancel own vacation request.
+    Cancel vacation request.
+    Users can cancel their own requests. Admins can cancel any request.
     """
     result = await db.execute(select(models.VacationRequest).where(models.VacationRequest.id == request_id))
     request = result.scalars().first()
     if not request:
         raise HTTPException(status_code=404, detail="Request not found")
-        
-    if request.user_id != current_user.id:
+
+    # Allow cancellation if user is the owner OR if user is an admin
+    if request.user_id != current_user.id and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not enough permissions")
         
     if request.status != "pending" and request.status != "approved":
