@@ -86,13 +86,6 @@ export default function LoginPage() {
                             )}
                         </button>
                     </div>
-
-                    <div className="mt-4 text-center text-xs text-gray-500">
-                        <p>Demo credentials:</p>
-                        <p>Admin: admin@company.com / password123</p>
-                        <p>Manager: manager@company.com / password123</p>
-                        <p>Employee: employee1@company.com / password123</p>
-                    </div>
                 </form>
             </div>
         </div>
