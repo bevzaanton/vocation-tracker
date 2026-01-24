@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function LoginPage() {
     const { register, handleSubmit } = useForm();
@@ -11,6 +13,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const onSubmit = async (data: any) => {
         console.log('onSubmit called with data:', data);
@@ -24,7 +27,7 @@ export default function LoginPage() {
             navigate('/');
         } catch (err: any) {
             console.error('Login error:', err);
-            setError('Invalid email or password');
+            setError(t('login.error'));
         } finally {
             setLoading(false);
         }
@@ -32,13 +35,16 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+            <div className="absolute top-4 right-4">
+                <LanguageSwitcher />
+            </div>
             <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Vacation Manager
+                        {t('login.title')}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Sign in to manage your time off
+                        {t('login.subtitle')}
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
@@ -50,7 +56,7 @@ export default function LoginPage() {
                                 autoComplete="email"
                                 required
                                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
+                                placeholder={t('login.emailPlaceholder')}
                                 {...register('email', { required: true })}
                             />
                         </div>
@@ -61,7 +67,7 @@ export default function LoginPage() {
                                 autoComplete="current-password"
                                 required
                                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                                placeholder="Password"
+                                placeholder={t('login.passwordPlaceholder')}
                                 {...register('password', { required: true })}
                             />
                         </div>
@@ -82,16 +88,16 @@ export default function LoginPage() {
                             {loading ? (
                                 <Loader2 className="animate-spin h-5 w-5" />
                             ) : (
-                                'Sign in'
+                                t('login.signIn')
                             )}
                         </button>
                     </div>
 
                     <div className="mt-4 text-center text-xs text-gray-500">
-                        <p>Demo credentials:</p>
-                        <p>Admin: admin@company.com / password123</p>
-                        <p>Manager: manager@company.com / password123</p>
-                        <p>Employee: employee1@company.com / password123</p>
+                        <p>{t('login.demoCredentials')}</p>
+                        <p>{t('login.admin')}: admin@company.com / password123</p>
+                        <p>{t('login.manager')}: manager@company.com / password123</p>
+                        <p>{t('login.employee')}: employee1@company.com / password123</p>
                     </div>
                 </form>
             </div>

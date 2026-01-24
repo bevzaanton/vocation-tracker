@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import {
     LayoutDashboard,
@@ -10,6 +11,7 @@ import {
     Settings
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -18,20 +20,21 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
     const { user, logout } = useAuth();
     const location = useLocation();
+    const { t } = useTranslation();
 
     const navigation = [
-        { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-        { name: 'My Requests', href: '/requests', icon: CalendarDays },
-        { name: 'New Request', href: '/requests/new', icon: PlusCircle },
-        { name: 'Team Calendar', href: '/calendar', icon: Users },
+        { name: t('nav.dashboard'), href: '/', icon: LayoutDashboard },
+        { name: t('nav.myRequests'), href: '/requests', icon: CalendarDays },
+        { name: t('nav.newRequest'), href: '/requests/new', icon: PlusCircle },
+        { name: t('nav.teamCalendar'), href: '/calendar', icon: Users },
     ];
 
     if (user?.role === 'manager' || user?.role === 'admin') {
-        navigation.push({ name: 'Team Approvals', href: '/approvals', icon: Users });
+        navigation.push({ name: t('nav.teamApprovals'), href: '/approvals', icon: Users });
     }
 
     if (user?.role === 'admin') {
-        navigation.push({ name: 'Admin Settings', href: '/admin', icon: Settings });
+        navigation.push({ name: t('nav.adminSettings'), href: '/admin', icon: Settings });
     }
 
     return (
@@ -40,12 +43,12 @@ export default function Layout({ children }: LayoutProps) {
             <div className="hidden md:flex md:w-64 md:flex-col fixed h-full bg-white border-r">
                 <div className="flex-1 flex flex-col pt-5 pb-4">
                     <div className="flex items-center flex-shrink-0 px-4">
-                        <h1 className="text-xl font-bold text-gray-800">Vacation Manager</h1>
+                        <h1 className="text-xl font-bold text-gray-800">{t('app.title')}</h1>
                     </div>
                     <nav className="mt-8 flex-1 px-2 space-y-1">
                         {navigation.map((item) => (
                             <Link
-                                key={item.name}
+                                key={item.href}
                                 to={item.href}
                                 className={cn(
                                     location.pathname === item.href
@@ -65,23 +68,28 @@ export default function Layout({ children }: LayoutProps) {
                         ))}
                     </nav>
                 </div>
-                <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-                    <div className="flex-shrink-0 w-full group block">
-                        <div className="flex items-center">
-                            <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center">
-                                <span className="font-medium text-blue-800 leading-none">{user?.name?.charAt(0)}</span>
-                            </div>
-                            <div className="ml-3">
-                                <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                                    {user?.name}
-                                </p>
-                                <button
-                                    onClick={logout}
-                                    className="text-xs font-medium text-gray-500 group-hover:text-gray-700 flex items-center"
-                                >
-                                    <LogOut className="mr-1 h-3 w-3" />
-                                    Sign out
-                                </button>
+                <div className="flex-shrink-0 border-t border-gray-200">
+                    <div className="px-4 py-3">
+                        <LanguageSwitcher />
+                    </div>
+                    <div className="flex border-t border-gray-200 p-4">
+                        <div className="flex-shrink-0 w-full group block">
+                            <div className="flex items-center">
+                                <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <span className="font-medium text-blue-800 leading-none">{user?.name?.charAt(0)}</span>
+                                </div>
+                                <div className="ml-3">
+                                    <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                                        {user?.name}
+                                    </p>
+                                    <button
+                                        onClick={logout}
+                                        className="text-xs font-medium text-gray-500 group-hover:text-gray-700 flex items-center"
+                                    >
+                                        <LogOut className="mr-1 h-3 w-3" />
+                                        {t('nav.signOut')}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

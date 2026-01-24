@@ -1,0 +1,133 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "submit": "Submit",
+    "approve": "Approve",
+    "reject": "Reject",
+    "total": "Total",
+    "used": "Used",
+    "daysRemaining": "days remaining",
+    "businessDays": "business days",
+    "submittedOn": "Submitted on"
+  },
+  "app": {
+    "title": "Vacation Manager"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "myRequests": "My Requests",
+    "newRequest": "New Request",
+    "teamCalendar": "Team Calendar",
+    "teamApprovals": "Team Approvals",
+    "adminSettings": "Admin Settings",
+    "signOut": "Sign out"
+  },
+  "login": {
+    "title": "Vacation Manager",
+    "subtitle": "Sign in to manage your time off",
+    "emailPlaceholder": "Email address",
+    "passwordPlaceholder": "Password",
+    "signIn": "Sign in",
+    "error": "Invalid email or password",
+    "demoCredentials": "Demo credentials:",
+    "admin": "Admin",
+    "manager": "Manager",
+    "employee": "Employee"
+  },
+  "dashboard": {
+    "welcomeBack": "Welcome back, {{name}}",
+    "overview": "Here's your time off overview for 2025.",
+    "upcomingRequests": "Upcoming Requests",
+    "pendingApprovals": "Pending Approvals",
+    "noUpcoming": "No upcoming time off scheduled.",
+    "noPendingApprovals": "No requests waiting for your approval."
+  },
+  "requests": {
+    "title": "My Requests",
+    "newRequest": "New Request",
+    "noRequests": "No requests found.",
+    "status": {
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "pending": "Pending",
+      "cancelled": "Cancelled"
+    }
+  },
+  "newRequest": {
+    "title": "New Vacation Request",
+    "vacationType": "Vacation Type",
+    "selectType": "Select a type",
+    "balanceInfo": "Balance Information",
+    "balanceRemaining": "You have {{days}} days remaining for this type.",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "comment": "Comment (Optional)",
+    "submitRequest": "Submit Request",
+    "createError": "Failed to create request. Check dates or balance."
+  },
+  "calendar": {
+    "title": "Team Calendar",
+    "weekdays": {
+      "mon": "M",
+      "tue": "T",
+      "wed": "W",
+      "thu": "T",
+      "fri": "F",
+      "sat": "S",
+      "sun": "S"
+    }
+  },
+  "approvals": {
+    "title": "Pending Approvals",
+    "noApprovals": "No pending approvals."
+  },
+  "admin": {
+    "holidays": {
+      "tab": "Manage Holidays",
+      "addTitle": "Add Public Holiday",
+      "name": "Name",
+      "namePlaceholder": "e.g. New Year",
+      "date": "Date",
+      "noHolidays": "No holidays found."
+    },
+    "users": {
+      "tab": "Manage Users",
+      "addTitle": "Add New User",
+      "editTitle": "Edit User",
+      "cancelEdit": "Cancel Edit",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "(Leave blank to keep current)",
+      "role": "Role",
+      "roleEmployee": "Employee",
+      "roleManager": "Manager",
+      "roleAdmin": "Admin",
+      "startWorkingDate": "Start Working Date",
+      "startDateHint": "If set, vacation balance for the current year will be calculated automatically.",
+      "managerId": "Manager ID (Optional)",
+      "managerIdPlaceholder": "e.g. 1",
+      "approvers": "Approvers",
+      "approversHint": "Hold Ctrl (Windows) or Cmd (Mac) to select multiple.",
+      "isActive": "Is Active",
+      "inactive": "Inactive",
+      "createUser": "Create User",
+      "updateUser": "Update User",
+      "directoryTitle": "Users Directory",
+      "directoryDescription": "List of all users in the system.",
+      "deleteConfirm": "Are you sure you want to delete {{name}}? This will mark them as inactive.",
+      "updateSuccess": "User updated successfully",
+      "createSuccess": "User created successfully",
+      "saveError": "Failed to save user"
+    }
+  },
+  "language": {
+    "english": "English",
+    "ukrainian": "Ukrainian"
+  }
+}

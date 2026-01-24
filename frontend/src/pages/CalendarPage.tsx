@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/layout/Layout';
 import { calendarApi, type CalendarEntry } from '../api/calendar';
 import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -9,6 +10,7 @@ export default function CalendarPage() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [entries, setEntries] = useState<CalendarEntry[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchCalendar = async () => {
@@ -43,7 +45,7 @@ export default function CalendarPage() {
     return (
         <Layout>
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Team Calendar</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('calendar.title')}</h1>
                 <div className="flex items-center space-x-4">
                     <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full">
                         <ChevronLeft className="h-5 w-5" />
@@ -64,20 +66,16 @@ export default function CalendarPage() {
             ) : (
                 <div className="bg-white shadow ring-1 ring-black ring-opacity-5 lg:flex lg:flex-auto lg:flex-col overflow-hidden rounded-lg">
                     <div className="grid grid-cols-7 gap-px border-b border-gray-300 bg-gray-200 text-center text-xs font-semibold leading-6 text-gray-700 lg:flex-none">
-                        <div className="bg-white py-2">M</div>
-                        <div className="bg-white py-2">T</div>
-                        <div className="bg-white py-2">W</div>
-                        <div className="bg-white py-2">T</div>
-                        <div className="bg-white py-2">F</div>
-                        <div className="bg-white py-2">S</div>
-                        <div className="bg-white py-2">S</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.mon')}</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.tue')}</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.wed')}</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.thu')}</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.fri')}</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.sat')}</div>
+                        <div className="bg-white py-2">{t('calendar.weekdays.sun')}</div>
                     </div>
                     <div className="flex bg-gray-200 text-xs leading-6 text-gray-700 lg:flex-auto">
                         <div className="hidden w-full lg:grid lg:grid-cols-7 lg:grid-rows-5 lg:gap-px">
-                            {/* Padding for start of month (simplified, date-fns handles this better with getDay but simple start here) */}
-                            {/* Actually eachDayOfInterval gives correct days but we need to pad empty cells if it doesn't start on Mon */}
-                            {/* For MVP speed, let's just list the days we have, grid might be misaligned if we don't pad */}
-                            {/* Let's pad properly */}
                             {Array.from({ length: (startOfMonth(currentDate).getDay() + 6) % 7 }).map((_, i) => (
                                 <div key={`pad-${i}`} className="bg-white px-3 py-2 min-h-[100px]" />
                             ))}
