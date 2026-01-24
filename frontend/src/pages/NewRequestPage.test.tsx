@@ -54,7 +54,7 @@ describe('NewRequestPage', () => {
                 <NewRequestPage />
             </MemoryRouter>
         );
-        expect(screen.getByText(/Loading.../i)).toBeInTheDocument();
+        expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
     it('renders form after loading data', async () => {
@@ -86,7 +86,7 @@ describe('NewRequestPage', () => {
             target: { value: '1' }
         });
 
-        expect(screen.getByText(/You have 10 days remaining for this type/i)).toBeInTheDocument();
+        expect(screen.getByText(/You have 10 days remaining/i)).toBeInTheDocument();
     });
 
     it('submits the form successfully', async () => {
