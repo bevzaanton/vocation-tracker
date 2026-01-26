@@ -50,6 +50,26 @@ class VacationBalanceResponse(BaseModel):
     used_days: int
     remaining_days: int
 
+# Balance Adjustment (Admin only)
+class BalanceAdjustment(BaseModel):
+    type_id: int
+    year: int = 2025
+    total_days: Optional[int] = None
+    used_days: Optional[int] = None
+    reason: Optional[str] = None
+
+class BalanceAdjustmentResponse(BaseModel):
+    id: int
+    user_id: int
+    type_id: int
+    type_name: str
+    year: int
+    total_days: int
+    used_days: int
+    remaining_days: int
+    adjusted_by: str
+    reason: Optional[str] = None
+
 # Vacation Requests
 class VacationRequestBase(BaseModel):
     type_id: int

@@ -1,20 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import Layout from '../components/layout/Layout';
-import { adminApi, type PublicHoliday, type User } from '../api/admin';
-import { Loader2, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { adminApi, type PublicHoliday, type User, type UserBalance } from '../api/admin';
+import { Loader2, Plus, Pencil, Trash2, X, RefreshCw } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
+interface HolidayFormData {
+    date: string;
+    name: string;
+}
+
+interface UserFormData {
+    name: string;
+    email: string;
+    password?: string;
+    role: string;
+    manager_id?: string | number | null;
+    start_date?: string | null;
+    approver_ids?: string[];
+    is_active?: boolean;
+}
+
+interface BalanceFormData {
+    total_days: string | number;
+    used_days: string | number;
+    reason?: string;
+}
+
 export default function AdminPage() {
-    const [activeTab, setActiveTab] = useState<'holidays' | 'users'>('holidays');
+    const [activeTab, setActiveTab] = useState<'holidays' | 'users' | 'balances'>('holidays');
     const [holidays, setHolidays] = useState<PublicHoliday[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const { t } = useTranslation();
 
-    const { register: registerHoliday, handleSubmit: handleHolidaySubmit, reset: resetHoliday } = useForm();
-    const { register: registerUser, handleSubmit: handleUserSubmit, reset: resetUser, setValue } = useForm();
+    const { register: registerHoliday, handleSubmit: handleHolidaySubmit, reset: resetHoliday } = useForm<HolidayFormData>();
+    const { register: registerUser, handleSubmit: handleUserSubmit, reset: resetUser, setValue } = useForm<UserFormData>();
     const [editingUser, setEditingUser] = useState<User | null>(null);
+
+    // Balance adjustment state
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [userBalances, setUserBalances] = useState<UserBalance[]>([]);
+    const [balanceYear, setBalanceYear] = useState<number>(2025);
+    const { register: registerBalance, handleSubmit: handleBalanceSubmit, reset: resetBalance, setValue: setBalanceValue } = useForm<BalanceFormData>();
+    const [adjustingBalance, setAdjustingBalance] = useState<UserBalance | null>(null);
 
     const fetchHolidays = async () => {
         setLoading(true);
@@ -40,12 +69,34 @@ export default function AdminPage() {
         }
     };
 
+    const fetchUserBalance = useCallback(async (userId: number) => {
+        setLoading(true);
+        try {
+            const data = await adminApi.getUserBalance(userId, balanceYear);
+            setUserBalances(data);
+        } catch (e) {
+            console.error(e);
+            setUserBalances([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [balanceYear]);
+
     useEffect(() => {
         if (activeTab === 'holidays') fetchHolidays();
-        else fetchUsers();
+        else if (activeTab === 'users') fetchUsers();
+        else if (activeTab === 'balances') {
+            fetchUsers();
+        }
     }, [activeTab]);
 
-    const onHolidaySubmit = async (data: any) => {
+    useEffect(() => {
+        if (selectedUserId) {
+            fetchUserBalance(selectedUserId);
+        }
+    }, [selectedUserId, fetchUserBalance]);
+
+    const onHolidaySubmit = async (data: HolidayFormData) => {
         try {
             await adminApi.createHoliday(data.date, data.name);
             resetHoliday();
@@ -55,22 +106,38 @@ export default function AdminPage() {
         }
     };
 
-    const onUserSubmit = async (data: any) => {
+    const onUserSubmit = async (data: UserFormData) => {
         try {
-            const payload = {
-                ...data,
-                manager_id: data.manager_id ? parseInt(data.manager_id) : null,
-                start_date: data.start_date || null,
-                approver_ids: data.approver_ids ? (Array.isArray(data.approver_ids) ? data.approver_ids.map((id: string) => parseInt(id)) : [parseInt(data.approver_ids)]) : []
-            };
+            const managerId = data.manager_id ? parseInt(String(data.manager_id)) : null;
+            const approverIds = data.approver_ids
+                ? (Array.isArray(data.approver_ids) ? data.approver_ids.map((id: string) => parseInt(id)) : [parseInt(data.approver_ids[0])])
+                : [];
 
             if (editingUser) {
-                if (!payload.password) delete payload.password;
-                await adminApi.updateUser(editingUser.id, payload);
+                const updatePayload = {
+                    name: data.name,
+                    email: data.email,
+                    role: data.role,
+                    is_active: data.is_active,
+                    manager_id: managerId,
+                    start_date: data.start_date || undefined,
+                    approver_ids: approverIds,
+                    ...(data.password ? { password: data.password } : {})
+                };
+                await adminApi.updateUser(editingUser.id, updatePayload);
                 alert(t('admin.users.updateSuccess'));
                 setEditingUser(null);
             } else {
-                await adminApi.createUser(payload);
+                const createPayload = {
+                    name: data.name,
+                    email: data.email,
+                    password: data.password || '',
+                    role: data.role,
+                    manager_id: managerId,
+                    start_date: data.start_date || undefined,
+                    approver_ids: approverIds
+                };
+                await adminApi.createUser(createPayload);
                 alert(t('admin.users.createSuccess'));
             }
             resetUser();
@@ -86,8 +153,8 @@ export default function AdminPage() {
         setValue('name', user.name);
         setValue('email', user.email);
         setValue('role', user.role);
-        setValue('manager_id', user.manager_id);
-        setValue('start_date', user.start_date);
+        setValue('manager_id', user.manager_id ? String(user.manager_id) : undefined);
+        setValue('start_date', user.start_date ?? undefined);
         setValue('is_active', user.is_active);
 
         if (user.approvers) {
@@ -112,6 +179,45 @@ export default function AdminPage() {
         resetUser();
     };
 
+    const handleSelectUserForBalance = (userId: number) => {
+        setSelectedUserId(userId);
+        setAdjustingBalance(null);
+        resetBalance();
+    };
+
+    const handleEditBalance = (balance: UserBalance) => {
+        setAdjustingBalance(balance);
+        setBalanceValue('total_days', String(balance.total_days));
+        setBalanceValue('used_days', String(balance.used_days));
+        setBalanceValue('reason', '');
+    };
+
+    const cancelBalanceEdit = () => {
+        setAdjustingBalance(null);
+        resetBalance();
+    };
+
+    const onBalanceSubmit = async (data: BalanceFormData) => {
+        if (!selectedUserId || !adjustingBalance) return;
+
+        try {
+            await adminApi.adjustUserBalance(selectedUserId, {
+                type_id: adjustingBalance.type_id,
+                year: balanceYear,
+                total_days: parseInt(String(data.total_days)),
+                used_days: parseInt(String(data.used_days)),
+                reason: data.reason || undefined
+            });
+            alert(t('admin.balances.adjustSuccess'));
+            setAdjustingBalance(null);
+            resetBalance();
+            fetchUserBalance(selectedUserId);
+        } catch (e) {
+            console.error(e);
+            alert(t('admin.balances.adjustError'));
+        }
+    };
+
     return (
         <Layout>
             <div className="mb-6 border-b border-gray-200">
@@ -127,6 +233,12 @@ export default function AdminPage() {
                         className={`${activeTab === 'users' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                     >
                         {t('admin.users.tab')}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('balances')}
+                        className={`${activeTab === 'balances' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                    >
+                        {t('admin.balances.tab')}
                     </button>
                 </nav>
             </div>
@@ -268,6 +380,149 @@ export default function AdminPage() {
                             ))}
                         </ul>
                     </div>
+                </div>
+            )}
+
+            {activeTab === 'balances' && (
+                <div className="space-y-6">
+                    {/* User and Year Selection */}
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('admin.balances.title')}</h3>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('admin.balances.selectUser')}</label>
+                                <select
+                                    value={selectedUserId || ''}
+                                    onChange={(e) => handleSelectUserForBalance(parseInt(e.target.value))}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                                >
+                                    <option value="">{t('admin.balances.selectUserPlaceholder')}</option>
+                                    {users.filter(u => u.is_active).map(u => (
+                                        <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('admin.balances.year')}</label>
+                                <select
+                                    value={balanceYear}
+                                    onChange={(e) => setBalanceYear(parseInt(e.target.value))}
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                                >
+                                    <option value={2024}>2024</option>
+                                    <option value={2025}>2025</option>
+                                    <option value={2026}>2026</option>
+                                </select>
+                            </div>
+                            {selectedUserId && (
+                                <div className="flex items-end">
+                                    <button
+                                        onClick={() => fetchUserBalance(selectedUserId)}
+                                        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                    >
+                                        <RefreshCw className="h-4 w-4 mr-1" /> {t('admin.balances.refresh')}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Balance Display and Adjustment */}
+                    {selectedUserId && (
+                        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+                            <div className="px-4 py-5 sm:px-6">
+                                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                    {t('admin.balances.balanceFor', { name: users.find(u => u.id === selectedUserId)?.name })}
+                                </h3>
+                                <p className="mt-1 max-w-2xl text-sm text-gray-500">{t('admin.balances.balanceDescription')}</p>
+                            </div>
+
+                            {loading ? (
+                                <div className="p-4"><Loader2 className="animate-spin" /></div>
+                            ) : userBalances.length === 0 ? (
+                                <div className="p-4 text-gray-500">{t('admin.balances.noBalances')}</div>
+                            ) : (
+                                <div className="border-t border-gray-200">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.balances.leaveType')}</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.balances.totalDays')}</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.balances.usedDays')}</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.balances.remainingDays')}</th>
+                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('common.edit')}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {userBalances.map(balance => (
+                                                <tr key={balance.id}>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{balance.type_name}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{balance.total_days}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{balance.used_days}</td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <span className={`font-semibold ${balance.remaining_days < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                                            {balance.remaining_days}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <button onClick={() => handleEditBalance(balance)} className="text-blue-600 hover:text-blue-800">
+                                                            <Pencil className="h-4 w-4" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Balance Adjustment Form */}
+                    {adjustingBalance && (
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-medium text-gray-900">
+                                    {t('admin.balances.adjustTitle', { type: adjustingBalance.type_name })}
+                                </h3>
+                                <button onClick={cancelBalanceEdit} className="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                                    <X className="h-4 w-4 mr-1" /> {t('common.cancel')}
+                                </button>
+                            </div>
+                            <form onSubmit={handleBalanceSubmit(onBalanceSubmit)} className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">{t('admin.balances.totalDays')}</label>
+                                    <input
+                                        type="number"
+                                        {...registerBalance('total_days', { required: true, min: 0 })}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                                    />
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">{t('admin.balances.usedDays')}</label>
+                                    <input
+                                        type="number"
+                                        {...registerBalance('used_days', { required: true, min: 0 })}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                                    />
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700">{t('admin.balances.reason')}</label>
+                                    <input
+                                        type="text"
+                                        {...registerBalance('reason')}
+                                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 sm:text-sm"
+                                        placeholder={t('admin.balances.reasonPlaceholder')}
+                                    />
+                                </div>
+                                <div className="sm:col-span-6 flex justify-end">
+                                    <button type="submit" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                        <RefreshCw className="h-4 w-4 mr-1" /> {t('admin.balances.adjustButton')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </div>
             )}
         </Layout>

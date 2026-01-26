@@ -195,7 +195,7 @@ async def read_user_balance(
     """
     if current_user.id != user_id and current_user.role not in ["admin", "manager"]:
         raise HTTPException(status_code=400, detail="Not enough permissions")
-        
+
     result = await db.execute(
         select(models.VacationBalance)
         .options(selectinload(models.VacationBalance.vacation_type))
@@ -203,7 +203,7 @@ async def read_user_balance(
         .where(models.VacationBalance.year == year)
     )
     balances = result.scalars().all()
-    
+
     response = []
     for b in balances:
         response.append(schemas.VacationBalanceResponse(
@@ -216,3 +216,90 @@ async def read_user_balance(
             remaining_days=b.total_days - b.used_days
         ))
     return response
+
+
+@router.put("/{user_id}/balance/adjust", response_model=schemas.BalanceAdjustmentResponse)
+async def adjust_user_balance(
+    user_id: int,
+    adjustment: schemas.BalanceAdjustment,
+    db: AsyncSession = Depends(get_db),
+    current_user: models.User = Depends(deps.get_current_active_admin),
+) -> Any:
+    """
+    Adjust user vacation balance. Admin only.
+
+    - Allows admins to manually modify total_days or used_days for any leave type
+    - At least one of total_days or used_days must be provided
+    - Creates balance record if it doesn't exist for the user/type/year
+    """
+    # Verify user exists
+    result = await db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Verify vacation type exists
+    result = await db.execute(
+        select(models.VacationType).where(models.VacationType.id == adjustment.type_id)
+    )
+    vacation_type = result.scalars().first()
+    if not vacation_type:
+        raise HTTPException(status_code=404, detail="Vacation type not found")
+
+    # Check that at least one value is being adjusted
+    if adjustment.total_days is None and adjustment.used_days is None:
+        raise HTTPException(
+            status_code=400,
+            detail="At least one of total_days or used_days must be provided"
+        )
+
+    # Get or create balance record
+    result = await db.execute(
+        select(models.VacationBalance)
+        .options(selectinload(models.VacationBalance.vacation_type))
+        .where(models.VacationBalance.user_id == user_id)
+        .where(models.VacationBalance.type_id == adjustment.type_id)
+        .where(models.VacationBalance.year == adjustment.year)
+    )
+    balance = result.scalars().first()
+
+    if not balance:
+        # Create new balance record
+        balance = models.VacationBalance(
+            user_id=user_id,
+            type_id=adjustment.type_id,
+            year=adjustment.year,
+            total_days=adjustment.total_days if adjustment.total_days is not None else vacation_type.default_days,
+            used_days=adjustment.used_days if adjustment.used_days is not None else 0
+        )
+        db.add(balance)
+    else:
+        # Update existing balance
+        if adjustment.total_days is not None:
+            balance.total_days = adjustment.total_days
+        if adjustment.used_days is not None:
+            balance.used_days = adjustment.used_days
+
+    await db.commit()
+    await db.refresh(balance)
+
+    # Reload with vacation type for response
+    result = await db.execute(
+        select(models.VacationBalance)
+        .options(selectinload(models.VacationBalance.vacation_type))
+        .where(models.VacationBalance.id == balance.id)
+    )
+    balance = result.scalars().first()
+
+    return schemas.BalanceAdjustmentResponse(
+        id=balance.id,
+        user_id=balance.user_id,
+        type_id=balance.type_id,
+        type_name=balance.vacation_type.name,
+        year=balance.year,
+        total_days=balance.total_days,
+        used_days=balance.used_days,
+        remaining_days=balance.total_days - balance.used_days,
+        adjusted_by=current_user.name,
+        reason=adjustment.reason
+    )

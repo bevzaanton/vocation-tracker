@@ -95,6 +95,27 @@
       "date": "Date",
       "noHolidays": "No holidays found."
     },
+    "balances": {
+      "tab": "Adjust Balances",
+      "title": "Adjust Leave Balances",
+      "selectUser": "Select User",
+      "selectUserPlaceholder": "-- Select a user --",
+      "year": "Year",
+      "refresh": "Refresh",
+      "balanceFor": "Leave Balance for {{name}}",
+      "balanceDescription": "View and adjust vacation, sick leave, and personal day balances.",
+      "noBalances": "No balance records found for this user and year.",
+      "leaveType": "Leave Type",
+      "totalDays": "Total Days",
+      "usedDays": "Used Days",
+      "remainingDays": "Remaining",
+      "adjustTitle": "Adjust {{type}} Balance",
+      "reason": "Reason (Optional)",
+      "reasonPlaceholder": "e.g. Annual rollover, correction",
+      "adjustButton": "Save Adjustment",
+      "adjustSuccess": "Balance adjusted successfully",
+      "adjustError": "Failed to adjust balance"
+    },
     "users": {
       "tab": "Manage Users",
       "addTitle": "Add New User",

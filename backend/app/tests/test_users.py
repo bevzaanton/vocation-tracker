@@ -155,3 +155,149 @@ async def test_get_user_balances(auth_client: AsyncClient, db, normal_user: mode
     assert balance_item["total_days"] == 20
     assert balance_item["used_days"] == 5
     assert balance_item["year"] == 2026
+
+
+@pytest.mark.anyio
+async def test_adjust_balance_as_admin(admin_client: AsyncClient, db, normal_user: models.User):
+    """Test admin can adjust user vacation balance."""
+    # Create vacation type
+    vtype = models.VacationType(name="Vacation", color="#3B82F6", default_days=20)
+    db.add(vtype)
+    await db.commit()
+    await db.refresh(vtype)
+
+    # Create balance
+    balance = models.VacationBalance(
+        user_id=normal_user.id,
+        type_id=vtype.id,
+        total_days=20,
+        used_days=5,
+        year=2025
+    )
+    db.add(balance)
+    await db.commit()
+
+    # Adjust balance
+    adjustment_data = {
+        "type_id": vtype.id,
+        "year": 2025,
+        "total_days": 25,
+        "used_days": 3,
+        "reason": "Annual adjustment"
+    }
+    response = await admin_client.put(
+        f"/api/v1/users/{normal_user.id}/balance/adjust",
+        json=adjustment_data
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_days"] == 25
+    assert data["used_days"] == 3
+    assert data["remaining_days"] == 22
+    assert data["reason"] == "Annual adjustment"
+
+
+@pytest.mark.anyio
+async def test_adjust_balance_as_employee_forbidden(auth_client: AsyncClient, db, normal_user: models.User):
+    """Test regular employee cannot adjust balances."""
+    # Create vacation type
+    vtype = models.VacationType(name="Sick Leave", color="#EF4444", default_days=10)
+    db.add(vtype)
+    await db.commit()
+    await db.refresh(vtype)
+
+    adjustment_data = {
+        "type_id": vtype.id,
+        "year": 2025,
+        "total_days": 15
+    }
+    response = await auth_client.put(
+        f"/api/v1/users/{normal_user.id}/balance/adjust",
+        json=adjustment_data
+    )
+    assert response.status_code == 400  # Not admin
+
+
+@pytest.mark.anyio
+async def test_adjust_balance_creates_new_record(admin_client: AsyncClient, db, normal_user: models.User):
+    """Test balance adjustment creates new record if it doesn't exist."""
+    # Create vacation type
+    vtype = models.VacationType(name="Personal Day", color="#10B981", default_days=3)
+    db.add(vtype)
+    await db.commit()
+    await db.refresh(vtype)
+
+    # Adjust balance for a year where no balance exists
+    adjustment_data = {
+        "type_id": vtype.id,
+        "year": 2026,
+        "total_days": 5,
+        "used_days": 1
+    }
+    response = await admin_client.put(
+        f"/api/v1/users/{normal_user.id}/balance/adjust",
+        json=adjustment_data
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total_days"] == 5
+    assert data["used_days"] == 1
+    assert data["remaining_days"] == 4
+    assert data["year"] == 2026
+
+
+@pytest.mark.anyio
+async def test_adjust_balance_user_not_found(admin_client: AsyncClient, db):
+    """Test balance adjustment returns 404 for non-existent user."""
+    # Create vacation type
+    vtype = models.VacationType(name="Test Type", color="#000000", default_days=5)
+    db.add(vtype)
+    await db.commit()
+    await db.refresh(vtype)
+
+    adjustment_data = {
+        "type_id": vtype.id,
+        "year": 2025,
+        "total_days": 10
+    }
+    response = await admin_client.put(
+        "/api/v1/users/99999/balance/adjust",
+        json=adjustment_data
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_adjust_balance_vacation_type_not_found(admin_client: AsyncClient, normal_user: models.User):
+    """Test balance adjustment returns 404 for non-existent vacation type."""
+    adjustment_data = {
+        "type_id": 99999,
+        "year": 2025,
+        "total_days": 10
+    }
+    response = await admin_client.put(
+        f"/api/v1/users/{normal_user.id}/balance/adjust",
+        json=adjustment_data
+    )
+    assert response.status_code == 404
+
+
+@pytest.mark.anyio
+async def test_adjust_balance_no_values_provided(admin_client: AsyncClient, db, normal_user: models.User):
+    """Test balance adjustment requires at least total_days or used_days."""
+    # Create vacation type
+    vtype = models.VacationType(name="Leave Type", color="#F59E0B", default_days=10)
+    db.add(vtype)
+    await db.commit()
+    await db.refresh(vtype)
+
+    adjustment_data = {
+        "type_id": vtype.id,
+        "year": 2025
+        # No total_days or used_days provided
+    }
+    response = await admin_client.put(
+        f"/api/v1/users/{normal_user.id}/balance/adjust",
+        json=adjustment_data
+    )
+    assert response.status_code == 400
