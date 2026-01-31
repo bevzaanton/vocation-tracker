@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/layout/Layout';
 import { requestApi, type VacationRequest } from '../api/requests';
 import apiClient from '../api/client';
@@ -8,19 +9,11 @@ import { format } from 'date-fns';
 export default function ApprovalsPage() {
     const [requests, setRequests] = useState<VacationRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t } = useTranslation();
 
     const fetchRequests = async () => {
         try {
-            // Logic for approvals: get all requests (filtered by manager permission in backend)
-            // The backend 'getRequests' should already filter based on manager view if implemented correctly.
-            // In our current backend implementation, it fetches logic for Manager to see own requests?
-            // Wait, in backend `read_requests`:
-            // `if current_user.role == "manager": pass` -> means it returns ALL requests currently as I didn't implement the filtering 
-            // strictly for direct reports yet. Ideally we should add that, but for now this page will show all requests if backend returns valid data.
-            // Let's rely on backend returning what we need.
-
             const data = await requestApi.getRequests();
-            // Filter client side for PENDING only for this view
             const pending = data.filter(r => r.status === 'pending');
             setRequests(pending);
         } catch (error) {
@@ -37,7 +30,7 @@ export default function ApprovalsPage() {
     const handleApprove = async (id: number) => {
         try {
             await apiClient.post(`/requests/${id}/approve`);
-            fetchRequests(); // Refresh list
+            fetchRequests();
         } catch (error) {
             console.error('Failed to approve', error);
         }
@@ -46,7 +39,7 @@ export default function ApprovalsPage() {
     const handleReject = async (id: number) => {
         try {
             await apiClient.post(`/requests/${id}/reject`);
-            fetchRequests(); // Refresh list
+            fetchRequests();
         } catch (error) {
             console.error('Failed to reject', error);
         }
@@ -54,7 +47,7 @@ export default function ApprovalsPage() {
 
     return (
         <Layout>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Pending Approvals</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('approvals.title')}</h1>
 
             {loading ? (
                 <div className="flex justify-center p-8">
@@ -63,7 +56,7 @@ export default function ApprovalsPage() {
             ) : (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                     {requests.length === 0 ? (
-                        <div className="p-6 text-center text-gray-500">No pending approvals.</div>
+                        <div className="p-6 text-center text-gray-500">{t('approvals.noApprovals')}</div>
                     ) : (
                         <ul className="divide-y divide-gray-200">
                             {requests.map((request) => (
@@ -86,13 +79,13 @@ export default function ApprovalsPage() {
                                                     onClick={() => handleApprove(request.id)}
                                                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700"
                                                 >
-                                                    <Check className="mr-1 h-3 w-3" /> Approve
+                                                    <Check className="mr-1 h-3 w-3" /> {t('common.approve')}
                                                 </button>
                                                 <button
                                                     onClick={() => handleReject(request.id)}
                                                     className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-600 hover:bg-red-700"
                                                 >
-                                                    <X className="mr-1 h-3 w-3" /> Reject
+                                                    <X className="mr-1 h-3 w-3" /> {t('common.reject')}
                                                 </button>
                                             </div>
                                         </div>
@@ -102,7 +95,7 @@ export default function ApprovalsPage() {
                                                     {format(new Date(request.start_date), 'MMM d, yyyy')} - {format(new Date(request.end_date), 'MMM d, yyyy')}
                                                 </p>
                                                 <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                                                    {request.business_days} business days
+                                                    {request.business_days} {t('common.businessDays')}
                                                 </p>
                                             </div>
                                             {request.comment && (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/layout/Layout';
 import { requestApi, type VacationRequest } from '../api/requests';
 import { Loader2, Plus } from 'lucide-react';
@@ -9,6 +10,7 @@ import { cn } from '../utils/cn';
 export default function RequestsPage() {
     const [requests, setRequests] = useState<VacationRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchRequests = async () => {
@@ -35,16 +37,20 @@ export default function RequestsPage() {
         }
     };
 
+    const getStatusText = (status: string) => {
+        return t(`requests.status.${status}`) || status.charAt(0).toUpperCase() + status.slice(1);
+    };
+
     return (
         <Layout>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">My Requests</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{t('requests.title')}</h1>
                 <Link
                     to="/requests/new"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                 >
                     <Plus className="h-4 w-4 mr-2" />
-                    New Request
+                    {t('requests.newRequest')}
                 </Link>
             </div>
 
@@ -55,7 +61,7 @@ export default function RequestsPage() {
             ) : (
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                     {requests.length === 0 ? (
-                        <div className="p-6 text-center text-gray-500">No requests found.</div>
+                        <div className="p-6 text-center text-gray-500">{t('requests.noRequests')}</div>
                     ) : (
                         <ul className="divide-y divide-gray-200">
                             {requests.map((request) => (
@@ -73,7 +79,7 @@ export default function RequestsPage() {
                                             </div>
                                             <div className="ml-2 flex-shrink-0 flex">
                                                 <p className={cn("px-2 inline-flex text-xs leading-5 font-semibold rounded-full", getStatusColor(request.status))}>
-                                                    {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                                                    {getStatusText(request.status)}
                                                 </p>
                                             </div>
                                         </div>
@@ -83,12 +89,12 @@ export default function RequestsPage() {
                                                     {format(new Date(request.start_date), 'MMM d, yyyy')} - {format(new Date(request.end_date), 'MMM d, yyyy')}
                                                 </p>
                                                 <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                                                    {request.business_days} business days
+                                                    {request.business_days} {t('common.businessDays')}
                                                 </p>
                                             </div>
                                             <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                                                 <p>
-                                                    Submitted on {format(new Date(request.created_at), 'MMM d, yyyy')}
+                                                    {t('common.submittedOn')} {format(new Date(request.created_at), 'MMM d, yyyy')}
                                                 </p>
                                             </div>
                                         </div>

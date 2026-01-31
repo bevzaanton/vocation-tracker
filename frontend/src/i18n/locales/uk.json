@@ -1,0 +1,133 @@
+{
+  "common": {
+    "loading": "Завантаження...",
+    "cancel": "Скасувати",
+    "save": "Зберегти",
+    "add": "Додати",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "submit": "Надіслати",
+    "approve": "Схвалити",
+    "reject": "Відхилити",
+    "total": "Всього",
+    "used": "Використано",
+    "daysRemaining": "днів залишилось",
+    "businessDays": "робочих днів",
+    "submittedOn": "Подано"
+  },
+  "app": {
+    "title": "Менеджер Відпусток"
+  },
+  "nav": {
+    "dashboard": "Головна",
+    "myRequests": "Мої Заявки",
+    "newRequest": "Нова Заявка",
+    "teamCalendar": "Календар Команди",
+    "teamApprovals": "Погодження",
+    "adminSettings": "Налаштування",
+    "signOut": "Вийти"
+  },
+  "login": {
+    "title": "Менеджер Відпусток",
+    "subtitle": "Увійдіть для управління відпустками",
+    "emailPlaceholder": "Електронна пошта",
+    "passwordPlaceholder": "Пароль",
+    "signIn": "Увійти",
+    "error": "Невірна пошта або пароль",
+    "demoCredentials": "Демо-доступ:",
+    "admin": "Адмін",
+    "manager": "Менеджер",
+    "employee": "Працівник"
+  },
+  "dashboard": {
+    "welcomeBack": "Вітаємо, {{name}}",
+    "overview": "Огляд вашого часу відпустки на 2025 рік.",
+    "upcomingRequests": "Найближчі Заявки",
+    "pendingApprovals": "Очікують Погодження",
+    "noUpcoming": "Немає запланованих відпусток.",
+    "noPendingApprovals": "Немає заявок на погодження."
+  },
+  "requests": {
+    "title": "Мої Заявки",
+    "newRequest": "Нова Заявка",
+    "noRequests": "Заявок не знайдено.",
+    "status": {
+      "approved": "Схвалено",
+      "rejected": "Відхилено",
+      "pending": "Очікує",
+      "cancelled": "Скасовано"
+    }
+  },
+  "newRequest": {
+    "title": "Нова Заявка на Відпустку",
+    "vacationType": "Тип Відпустки",
+    "selectType": "Оберіть тип",
+    "balanceInfo": "Інформація про Баланс",
+    "balanceRemaining": "У вас залишилось {{days}} днів цього типу.",
+    "startDate": "Дата Початку",
+    "endDate": "Дата Закінчення",
+    "comment": "Коментар (Необов'язково)",
+    "submitRequest": "Надіслати Заявку",
+    "createError": "Не вдалося створити заявку. Перевірте дати або баланс."
+  },
+  "calendar": {
+    "title": "Календар Команди",
+    "weekdays": {
+      "mon": "Пн",
+      "tue": "Вт",
+      "wed": "Ср",
+      "thu": "Чт",
+      "fri": "Пт",
+      "sat": "Сб",
+      "sun": "Нд"
+    }
+  },
+  "approvals": {
+    "title": "Очікують Погодження",
+    "noApprovals": "Немає заявок на погодження."
+  },
+  "admin": {
+    "holidays": {
+      "tab": "Керування Святами",
+      "addTitle": "Додати Державне Свято",
+      "name": "Назва",
+      "namePlaceholder": "напр. Новий Рік",
+      "date": "Дата",
+      "noHolidays": "Свят не знайдено."
+    },
+    "users": {
+      "tab": "Керування Користувачами",
+      "addTitle": "Додати Нового Користувача",
+      "editTitle": "Редагувати Користувача",
+      "cancelEdit": "Скасувати Редагування",
+      "name": "Ім'я",
+      "email": "Електронна пошта",
+      "password": "Пароль",
+      "passwordHint": "(Залиште порожнім для збереження поточного)",
+      "role": "Роль",
+      "roleEmployee": "Працівник",
+      "roleManager": "Менеджер",
+      "roleAdmin": "Адміністратор",
+      "startWorkingDate": "Дата Початку Роботи",
+      "startDateHint": "Якщо вказано, баланс відпусток на поточний рік буде розраховано автоматично.",
+      "managerId": "ID Менеджера (Необов'язково)",
+      "managerIdPlaceholder": "напр. 1",
+      "approvers": "Погоджувачі",
+      "approversHint": "Утримуйте Ctrl (Windows) або Cmd (Mac) для множинного вибору.",
+      "isActive": "Активний",
+      "inactive": "Неактивний",
+      "createUser": "Створити Користувача",
+      "updateUser": "Оновити Користувача",
+      "directoryTitle": "Каталог Користувачів",
+      "directoryDescription": "Список усіх користувачів системи.",
+      "deleteConfirm": "Ви впевнені, що хочете видалити {{name}}? Це позначить їх як неактивних.",
+      "updateSuccess": "Користувача успішно оновлено",
+      "createSuccess": "Користувача успішно створено",
+      "saveError": "Не вдалося зберегти користувача"
+    }
+  },
+  "language": {
+    "english": "Англійська",
+    "ukrainian": "Українська"
+  }
+}

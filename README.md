@@ -51,6 +51,7 @@ This application provides a comprehensive vacation management solution with thre
 - 📅 Team calendar
 - 👥 User management (admin)
 - 🎉 Public holidays configuration
+- 🌐 Multi-language support (English, Ukrainian)
 
 ## Tech Stack
 
@@ -61,6 +62,7 @@ This application provides a comprehensive vacation management solution with thre
 - **State Management:** React Context API + Hooks for authentication and local state
 - **HTTP Client:** Axios with interceptors for JWT token management and error handling
 - **Routing:** React Router v6 for client-side navigation
+- **Internationalization:** react-i18next with language detection and localStorage persistence
 - **Role:** Serves as the user interface, communicates with backend API for all data operations
 
 ### Backend

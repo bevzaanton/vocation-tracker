@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../context/AuthContext';
 import { balanceApi, type VacationBalance } from '../api/balance';
@@ -6,6 +7,7 @@ import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [balances, setBalances] = useState<VacationBalance[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -29,8 +31,8 @@ export default function DashboardPage() {
     return (
         <Layout>
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Welcome back, {user?.name}</h1>
-                <p className="text-gray-600">Here's your time off overview for 2025.</p>
+                <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.welcomeBack', { name: user?.name })}</h1>
+                <p className="text-gray-600">{t('dashboard.overview')}</p>
             </div>
 
             {loading ? (
@@ -49,12 +51,12 @@ export default function DashboardPage() {
                                     {balance.remaining_days}
                                 </span>
                                 <span className="ml-2 text-sm text-gray-500">
-                                    days remaining
+                                    {t('common.daysRemaining')}
                                 </span>
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between text-sm">
-                                <span className="text-gray-500">Total: {balance.total_days}</span>
-                                <span className="text-gray-500">Used: {balance.used_days}</span>
+                                <span className="text-gray-500">{t('common.total')}: {balance.total_days}</span>
+                                <span className="text-gray-500">{t('common.used')}: {balance.used_days}</span>
                             </div>
                         </div>
                     ))}
@@ -64,16 +66,16 @@ export default function DashboardPage() {
             {/* Quick Actions & Recent Activity placeholders */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white rounded-xl shadow-sm p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">Upcoming Requests</h2>
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.upcomingRequests')}</h2>
                     <div className="text-gray-500 text-sm">
-                        No upcoming time off scheduled.
+                        {t('dashboard.noUpcoming')}
                     </div>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">Pending Approvals</h2>
+                    <h2 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.pendingApprovals')}</h2>
                     <div className="text-gray-500 text-sm">
-                        No requests waiting for your approval.
+                        {t('dashboard.noPendingApprovals')}
                     </div>
                 </div>
             </div>
