@@ -92,13 +92,6 @@ export default function LoginPage() {
                             )}
                         </button>
                     </div>
-
-                    <div className="mt-4 text-center text-xs text-gray-500">
-                        <p>{t('login.demoCredentials')}</p>
-                        <p>{t('login.admin')}: admin@company.com / password123</p>
-                        <p>{t('login.manager')}: manager@company.com / password123</p>
-                        <p>{t('login.employee')}: employee1@company.com / password123</p>
-                    </div>
                 </form>
             </div>
         </div>
