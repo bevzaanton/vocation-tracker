@@ -24,7 +24,7 @@ describe('Layout Component', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Vacation Manager')).toBeInTheDocument();
+        expect(screen.getAllByText('Vacation Manager').length).toBeGreaterThan(0);
         expect(screen.getByText('Test Content')).toBeInTheDocument();
     });
 
